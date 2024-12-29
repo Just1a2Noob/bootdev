@@ -1,1 +1,1 @@
-This is just a test
+This is a collection of guided projects from boot.dev
