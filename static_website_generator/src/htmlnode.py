@@ -41,7 +41,37 @@ class HTMLNode:
             return None
 
         result = ""
-        for i in self.props:
-            result += i + "=" + self.props[i] + " "
+        for key, value in self.props.items():
+            result += f'{key}="{value}" '
+        return result.strip()
 
-        return result
+
+class LeafNode(HTMLNode):
+    def __init__(self, tag, value, props=None):
+        if not value:  # Ensure value is not empty
+            raise ValueError("value cannot be empty")
+        super().__init__(tag, value, props=props)
+
+    def __eq__(self, other):
+        return (
+            self.tag == other.tag,
+            self.value == other.value,
+            self.props == other.props,
+        )
+
+    def to_html(self):
+        props = super().props_to_html()
+
+        if self.tag is None:
+            return self.value
+
+        if props is None:
+            return f"<{self.tag}>{self.value}</{self.tag}>"
+        return f"<{self.tag} {props}>{self.value}</{self.tag}>"
+
+
+dummy1 = LeafNode("p", "This is a paragraph of text.")
+dummy2 = LeafNode("a", "Click me!", {"href": "https://www.google.com"})
+
+print(dummy1.to_html())
+print(dummy2.to_html())
