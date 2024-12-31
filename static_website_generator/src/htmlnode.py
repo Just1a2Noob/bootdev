@@ -18,7 +18,7 @@ class HTMLNode:
         self.tag = tag
         self.value = value
         self.children = children if children is None else []
-        self.props = props if props is None else {}
+        self.props = props
 
     def __eq__(self, other):
         if not isinstance(other, HTMLNode):
@@ -50,6 +50,10 @@ class LeafNode(HTMLNode):
     def __init__(self, tag, value, props=None):
         if not value:  # Ensure value is not empty
             raise ValueError("value cannot be empty")
+        if value is str:
+            if len(value) < 1:
+                raise ValueError("value cannot be empty")
+
         super().__init__(tag, value, props=props)
 
     def __eq__(self, other):
