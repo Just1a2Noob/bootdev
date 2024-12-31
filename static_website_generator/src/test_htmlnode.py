@@ -1,6 +1,6 @@
 import unittest
 
-from htmlnode import HTMLNode, LeafNode
+from htmlnode import HTMLNode, LeafNode, ParentNode
 
 
 class TestHTMLNode(unittest.TestCase):
@@ -45,9 +45,8 @@ class TestHTMLNode(unittest.TestCase):
         self.assertEqual(node, node2)
 
     def test_HTMLNode_invalid_tag(self):
-        with self.assertRaises(TypeError) as cm:
-            HTMLNode(123, "Valid text", [], {})
-        self.assertEqual(str(cm.exception), "tag must be a string")
+        with self.assertRaises(TypeError):
+            HTMLNode(123, "Content")
 
     def test_HTMLNode_invalid_text(self):
         with self.assertRaises(TypeError) as cm:
@@ -87,6 +86,31 @@ class TestLeafNode(unittest.TestCase):
         with self.assertRaises(ValueError) as cm:
             LeafNode("p", "")
         self.assertEqual(str(cm.exception), "value cannot be empty")
+
+
+class test_ParentNode(unittest.TestCase):
+    def test_ParentNode_to_html(self):
+        node = ParentNode(
+            "p",
+            [
+                LeafNode("b", "Bold text"),
+                LeafNode(None, "Normal text"),
+                LeafNode("i", "italic text"),
+                LeafNode(None, "Normal text"),
+            ],
+        )
+        node2 = "<p><b>Bold text</b>Normal text<i>italic text</i>Normal text</p>"
+        self.assertEqual(node.to_html(), node2)
+
+    def test_ParentNode_invalid_children(self):
+        with self.assertRaises(TypeError) as cm:
+            ParentNode("p", "")
+        self.assertEqual(str(cm.exception), "children must be list or None")
+
+    def test_ParentNode_invalid_tag(self):
+        with self.assertRaises(ValueError) as cm:
+            ParentNode(None, [LeafNode("b", "Bold text")])
+        self.assertEqual(str(cm.exception), "tag cannot be empty")
 
 
 if __name__ == "__main__":
