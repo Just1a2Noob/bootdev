@@ -1,9 +1,8 @@
 import unittest
 
-from htmlnode import HTMLNode
+from htmlnode import HTMLNode, LeafNode
 
 
-# TODO: Create some test cases for HTMLNode check for edge cases
 class TestHTMLNode(unittest.TestCase):
     def test_HTMLNode(self):
         node = HTMLNode(
@@ -64,6 +63,30 @@ class TestHTMLNode(unittest.TestCase):
         node = HTMLNode("p", "Some text should be here")
         node2 = HTMLNode("p", "Some text should be here")
         self.assertEqual(node, node2)
+
+
+class TestLeafNode(unittest.TestCase):
+    def test_LeafNode_to_html(self):
+        node = LeafNode("p", "This is a paragraph of text.")
+        node2 = "<p>This is a paragraph of text.</p>"
+        self.assertEqual(node.to_html(), node2)
+
+        node3 = LeafNode("a", "Click me!", {"href": "https://www.google.com"})
+        node4 = """<a href="https://www.google.com">Click me!</a>"""
+        self.assertEqual(node3.to_html(), node4)
+
+    def test_LeafNode_invalid_empty_value(self):
+        with self.assertRaises(TypeError) as cm:
+            LeafNode("p")
+        self.assertEqual(
+            str(cm.exception),
+            "LeafNode.__init__() missing 1 required positional argument: 'value'",
+        )
+
+    def test_LeafNode_invalid_empty_string(self):
+        with self.assertRaises(ValueError) as cm:
+            LeafNode("p", "")
+        self.assertEqual(str(cm.exception), "value cannot be empty")
 
 
 if __name__ == "__main__":
