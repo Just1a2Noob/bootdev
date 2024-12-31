@@ -1,13 +1,7 @@
 class HTMLNode:
-    # tag represents the HTML tag name
-    # value represent a string the value of the HTML
-    # children represent a list of HTMLNode objects that
-    # represents children of this node
-    # props represents a dict representing HTML attributes
-    # {"href": "https://www.google.com"}
     def __init__(self, tag, value, children=None, props=None):
-        if not isinstance(tag, str):
-            raise TypeError("tag must be a string")
+        if not (isinstance(tag, str) or tag is None):
+            raise TypeError("tag must be a string or None")
         if not (isinstance(value, str) or value is None):
             raise TypeError("text must be a string or None")
         if children is not None and not isinstance(children, list):
@@ -77,28 +71,32 @@ class LeafNode(HTMLNode):
 class ParentNode(HTMLNode):
     def __init__(self, tag, children, props=None):
         # Check if tag is None
-        if self.tag is None:
+        if tag is None:
             raise ValueError("tag cannot be empty")
         # Check if children is none
-        if self.children is None:
+        if children is None:
             raise ValueError("children cannot be empty")
 
         # Check if tag is just an empty string
-        if self.tag is str:
-            if self.len(self.tag) < 1:
+        if tag is str:
+            if self.len(tag) < 1:
                 raise ValueError("tag cannot be empty")
+
         # Check if children is an empty list
-        if self.children is list:
-            if len(self.children) < 1:
+        if children is not None and not isinstance(children, list):
+            raise TypeError("children must be list or None")
+        else:
+            if len(children) < 1:
                 raise ValueError("children cannot be empty")
-        super().__init__(tag, children, props)
+
+        super().__init__(tag=tag, value=None, children=children, props=props)
 
     def to_html(self):
         result = ""
         for child in self.children:
-            if child is LeafNode:
-                result += child.to_html()
-            else:
+            if not all(isinstance(child, LeafNode) for child in self.children):
                 raise ValueError("children inside list has to be type LeafNode")
+            else:
+                result += child.to_html()
 
         return f"<{self.tag}>{result}</{self.tag}>"
