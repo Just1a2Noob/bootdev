@@ -17,7 +17,7 @@ class HTMLNode:
 
         self.tag = tag
         self.value = value
-        self.children = children if children is None else []
+        self.children = children
         self.props = props
 
     def __eq__(self, other):
@@ -74,8 +74,31 @@ class LeafNode(HTMLNode):
         return f"<{self.tag} {props}>{self.value}</{self.tag}>"
 
 
-dummy1 = LeafNode("p", "This is a paragraph of text.")
-dummy2 = LeafNode("a", "Click me!", {"href": "https://www.google.com"})
+class ParentNode(HTMLNode):
+    def __init__(self, tag, children, props=None):
+        # Check if tag is None
+        if self.tag is None:
+            raise ValueError("tag cannot be empty")
+        # Check if children is none
+        if self.children is None:
+            raise ValueError("children cannot be empty")
 
-print(dummy1.to_html())
-print(dummy2.to_html())
+        # Check if tag is just an empty string
+        if self.tag is str:
+            if self.len(self.tag) < 1:
+                raise ValueError("tag cannot be empty")
+        # Check if children is an empty list
+        if self.children is list:
+            if len(self.children) < 1:
+                raise ValueError("children cannot be empty")
+        super().__init__(tag, children, props)
+
+    def to_html(self):
+        result = ""
+        for child in self.children:
+            if child is LeafNode:
+                result += child.to_html()
+            else:
+                raise ValueError("children inside list has to be type LeafNode")
+
+        return f"<{self.tag}>{result}</{self.tag}>"
