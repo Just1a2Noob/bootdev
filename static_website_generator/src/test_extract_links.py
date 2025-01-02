@@ -43,5 +43,8 @@ class test_extract_markdown_images(unittest.TestCase):
         )
 
 
+# TODO: Create tests for extract_markdown_images
+
+
 if __name__ == "__main__":
     unittest.main()
