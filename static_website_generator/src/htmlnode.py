@@ -50,6 +50,9 @@ class LeafNode(HTMLNode):
 
         super().__init__(tag, value, props=props)
 
+    def __repr__(self):
+        return f"LeafNode({self.tag}, {self.value}, {self.props})"
+
     def __eq__(self, other):
         return (
             self.tag == other.tag,
@@ -90,6 +93,9 @@ class ParentNode(HTMLNode):
                 raise ValueError("children cannot be empty")
 
         super().__init__(tag=tag, value=None, children=children, props=props)
+
+    def __repr__(self):
+        return f"ParentNode({self.tag}, {self.children}), {self.props}"
 
     def to_html(self):
         result = ""
