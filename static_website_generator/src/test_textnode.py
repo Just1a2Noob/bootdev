@@ -5,7 +5,7 @@ from textnode import TextNode, TextType, text_node_to_html_node
 
 
 class TestTextNode(unittest.TestCase):
-    def test_textnode_with_invalid_text_type(self):
+    def test_with_invalid_text_type(self):
         with self.assertRaises(AttributeError) as cm:
             TextNode("This is a text node", TextType.RANDOM)
         self.assertEqual(
@@ -23,7 +23,7 @@ class TestTextNode(unittest.TestCase):
         self.assertEqual(node3, node4)
 
 
-class test_text_node_to_html_node(unittest.TestCase):
+class test_to_html_node(unittest.TestCase):
     def test_url_props(self):
         node = TextNode("Lorem Ipsum", TextType.ITALIC)
         node2 = LeafNode("i", "Lorem Ipsum", None)
