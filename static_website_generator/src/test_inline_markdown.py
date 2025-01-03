@@ -43,24 +43,18 @@ class test_split_delimiter(unittest.TestCase):
         with self.assertRaises(ValueError):
             split_nodes_delimiter([node1], "**", TextType.BOLD)
 
-    # BUG: Fix this text it shouldve be pass but it did not
-
-    #   def test_non_text_node(self):
-    #       with self.assertRaises(TypeError):
-    #           split_nodes_delimiter(["not_a_node"], "**", TextType.BOLD)
+    def test_non_text_node(self):
+        with self.assertRaises(ValueError):
+            split_nodes_delimiter(["not_a_node"], "**", TextType.BOLD)
 
     def test_invalid_old_nodes_type(self):
         with self.assertRaises(TypeError):
             split_nodes_delimiter("not_a_list", "**", TextType.BOLD)
 
-    # BUG: Fix this text it shouldve be pass but it did not
-
-    #   def test_invalid_text_type(self):
-    #       node1 = TextNode("This is a bold word.", TextType.TEXT)
-    #
-    #       with self.assertRaises(ValueError) as cm:
-    #           split_nodes_delimiter([node1], "**", "not_a_TextType")
-    #       self.assertEqual(str(cm.exception), "text_type must be a class of TextType")
+    def test_invalid_text_type(self):
+        node1 = TextNode("This is a bold word.", TextType.TEXT)
+        with self.assertRaises(ValueError):
+            split_nodes_delimiter([node1], "**", "not_a_TextType")
 
 
 class test_extract_link(unittest.TestCase):
@@ -107,6 +101,20 @@ class test_extract_images(unittest.TestCase):
         ]
         self.assertEqual(split_nodes_image([node]), node2)
 
+    def test_invalid_text_node(self):
+        with self.assertRaises(TypeError) as cm:
+            split_nodes_image(
+                ["This is a youtube [link](https://www.youtube.com)", TextType.TEXT]
+            )
+        self.assertEqual(str(cm.exception), "The list must only contain TextNode")
+
+    def test_invalid_old_nodes(self):
+        with self.assertRaises(ValueError) as cm:
+            split_nodes_image(
+                {"link": "https://www.youtube.com", "text_type": TextType.TEXT}
+            )
+        self.assertEqual(str(cm.exception), "Input must be type list")
+
 
 class test_extract_markdown_links(unittest.TestCase):
     def test_valid_input(self):
@@ -128,9 +136,6 @@ class test_extract_markdown_images(unittest.TestCase):
             ("obi wan", "https://i.imgur.com/fJRm4Vk.jpeg"),
         ]
         self.assertEqual(extract_markdown_images(node), node2)
-
-
-# TODO: Create tests for extract_markdown_images
 
 
 class test_text_to_text_nodes(unittest.TestCase):
