@@ -1,2 +1,4 @@
 __pycache__/
-
+output_test.sh
+test_results.txt
+markdown-parser-docs.md
