@@ -5,109 +5,102 @@ from textnode import TextNode, TextType
 
 
 def split_nodes_delimiter(old_nodes, delimiter, text_type):
-    if type(old_nodes) is not list:
+    if not isinstance(old_nodes, list):
         raise TypeError("old_nodes must be a list")
 
     if delimiter is None or not isinstance(delimiter, str):
         raise ValueError("delimiter must be type str and cannot be empty")
-    if text_type is None or not isinstance(text_type, TextType):
-        raise ValueError("text_type must be class TextType and cannot be empty")
+    if text_type is None:
+        raise ValueError("text_type cannot be empty")
 
-    result = []
+    if not isinstance(text_type, TextType):
+        raise TypeError("text_type must be of class TextType")
+
+    results = []
     for node in old_nodes:
         if not isinstance(node, TextNode):
-            raise ValueError("The list must contain TextNode")
+            raise TypeError("Elements in old_nodes must be of type TextNode")
 
-        # TODO: This can only find one link change it to re.findall
-        try:
-            keyword = re.search(f"{delimiter}(.+?){delimiter}", node.text).group(1)
-        except Exception:
-            raise Exception("Invalid markdown syntax")
-        raw_split = node.text.split(delimiter)
-        for i in raw_split:
-            if keyword in i:
-                result.append(
-                    TextNode(
-                        text=keyword,
-                        text_type=text_type,
-                    )
-                )
+        split_nodes = []
+        sections = node.text.split(delimiter)
+        if len(sections) % 2 == 0:
+            raise ValueError("Invalid markdown syntax")
+        for i in range(len(sections)):
+            if sections[i] == "":
+                continue
+            if i % 2 == 0:
+                split_nodes.append(TextNode(sections[i], TextType.TEXT))
             else:
-                result.append(
-                    TextNode(
-                        text=i,
-                        text_type=node.text_type,
-                    )
-                )
-    return result
+                split_nodes.append(TextNode(sections[i], text_type))
+        results.extend(split_nodes)
+    return results
 
 
 def split_nodes_image(old_nodes):
-    if type(old_nodes) is not list:
-        raise TypeError("old_nodes must be a list")
+    if not isinstance(old_nodes, list):
+        raise ValueError("Input must be type list")
 
-    result = []
+    results = []
     for node in old_nodes:
-        if not isinstance(node, TextNode):
-            raise ValueError("The list must contain TextNode")
+        original_text = node.text
+        matches = extract_markdown_images(original_text)
+        if len(matches) == 0:
+            results.append(node)
+            continue
+        for alt, link in matches:
+            sections = original_text.split(f"![{alt}]({link})", 1)
 
-        images = {}
-        for i in extract_markdown_images(node.text):
-            images[i[0]] = i[1]
+            if len(sections) != 2:
+                raise ValueError("Invalid markdown, image selection is not closed")
 
-        original_list = re.split(r"!\[([^\[\]]*)\]\(([^()\s]+)\)", node.text)
-        max_length = len(original_list)
-        for key in images:
-            j = 0
-            while j < max_length:
-                if key in original_list[j]:
-                    result.append(TextNode(key, TextType.LINK, images[key]))
-                    original_list.remove(key)
-                    original_list.remove(images[key])
-                    max_length -= 2
-                    continue
-                else:
-                    result.append(TextNode(original_list[j], TextType.TEXT))
-                    original_list.remove(original_list[j])
+            if sections[0] != "":
+                results.append(TextNode(sections[0], TextType.TEXT))
 
-    return result
+            results.append(TextNode(alt, TextType.IMAGE, link))
+
+            # The statement below changes the original text
+            # Meaning for each loop it reduces the problem
+            original_text = sections[1]
+
+    # appends the remaining text at the end
+    if original_text != "":
+        results.append(TextNode(original_text, TextType.TEXT))
+
+    return results
 
 
 def split_nodes_link(old_nodes):
-    if type(old_nodes) is not list:
-        raise TypeError("old_nodes must be a list")
+    if not isinstance(old_nodes, list):
+        raise ValueError("Input must be type list")
 
-    result = []
+    results = []
     for node in old_nodes:
+
         if not isinstance(node, TextNode):
-            raise ValueError("The list must contain TextNode")
+            raise TypeError("The list must only contain TextNode")
 
-        images = {}
-        for i in extract_markdown_links(node.text):
-            images[i[0]] = i[1]
+        original_text = node.text
+        matches = extract_markdown_links(original_text)
+        if len(matches) == 0:
+            results.append(node)
+            continue
+        for alt, link in matches:
+            sections = original_text.split(f"[{alt}]({link})", 1)
 
-        original_list = re.split(r"(?<!\!)\[([^\[\]]+)\]\(([^()\s]+)\)", node.text)
-        max_length = len(original_list)
-        for key in images:
-            j = 0
-            while j < max_length:
-                if key in original_list[j]:
-                    result.append(TextNode(key, TextType.LINK, images[key]))
-                    original_list.remove(key)
-                    original_list.remove(images[key])
-                    max_length -= 2
-                    break
-                else:
-                    result.append(TextNode(original_list[j], TextType.TEXT))
-                    original_list.remove(original_list[j])
+            if len(sections) != 2:
+                raise ValueError("Invalid markdown, image selection is not closed")
 
-    return result
+            if sections[0] != "":
+                results.append(TextNode(sections[0], TextType.TEXT))
 
+            results.append(TextNode(alt, TextType.LINK, link))
 
-# TODO: Both split functions cannot handle the below test case
-# Fix both functions so that the test case below works
-node = TextNode(
-    "This is an image of a ![cute cat](https://www.imgur.com/cat) she is very cute",
-    TextType.TEXT,
-)
-print(split_nodes_image([node]))
+            # The statement below changes the original text
+            # Meaning for each loop it reduces the problem
+            original_text = sections[1]
+
+    # appends the remaining text at the end
+    if original_text != "":
+        results.append(TextNode(original_text, TextType.TEXT))
+
+    return results
