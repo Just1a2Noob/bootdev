@@ -5,61 +5,58 @@ from textnode import TextNode, TextType
 
 
 class test_split_delimiter(unittest.TestCase):
-    # TODO: Add 1 more test with multiple delimiters
-    def test_normality(self):
-        node1 = split_nodes_delimiter(
-            [
-                TextNode("This is text with a `code block` word", TextType.TEXT),
-            ],
-            "`",
-            TextType.CODE,
-        )
-        node2 = [
-            TextNode("This is text with a ", TextType.TEXT),
-            TextNode("code block", TextType.CODE),
-            TextNode(" word", TextType.TEXT),
+    def test_valid_input(self):
+        node1 = TextNode("This is a **bold** word.", TextType.TEXT)
+        expected_output = [
+            TextNode("This is a ", TextType.TEXT),
+            TextNode("bold", TextType.BOLD),
+            TextNode(" word.", TextType.TEXT),
         ]
-        self.assertEqual(node1, node2)
+        self.assertEqual(
+            split_nodes_delimiter([node1], "**", TextType.BOLD), expected_output
+        )
 
-    def test_syntax_error(self):
-        with self.assertRaises(Exception) as cm:
-            split_nodes_delimiter(
-                [TextNode("Lorem *Ipsum lorek", TextType.TEXT)],
-                "*",
-                TextType.ITALIC,
-            )
-        self.assertEqual(str(cm.exception), "Invalid markdown syntax")
+    def test_multiple_nodes(self):
+        node1 = TextNode("First **bold** word.", TextType.TEXT)
+        node2 = TextNode("Second **bold** word.", TextType.TEXT)
+        expected_output = [
+            TextNode("First ", TextType.TEXT),
+            TextNode("bold", TextType.BOLD),
+            TextNode(" word.", TextType.TEXT),
+            TextNode("Second ", TextType.TEXT),
+            TextNode("bold", TextType.BOLD),
+            TextNode(" word.", TextType.TEXT),
+        ]
+        self.assertEqual(
+            split_nodes_delimiter([node1, node2], "**", TextType.BOLD), expected_output
+        )
+
+    def test_empty_string(self):
+        node1 = TextNode("**", TextType.TEXT)
+        with self.assertRaises(ValueError):
+            split_nodes_delimiter([node1], "**", TextType.BOLD)
+
+    def test_non_text_node(self):
+        with self.assertRaises(TypeError):
+            split_nodes_delimiter(["not_a_node"], "**", TextType.BOLD)
+
+    def test_invalid_old_nodes_type(self):
+        with self.assertRaises(TypeError):
+            split_nodes_delimiter("not_a_list", "**", TextType.BOLD)
 
     def test_invalid_delimiter(self):
-        with self.assertRaises(ValueError) as cm:
-            split_nodes_delimiter(
-                [TextNode("Lorem Ipsum lorek", TextType.TEXT)],
-                [],
-                TextType.ITALIC,
-            )
-        self.assertEqual(
-            str(cm.exception), "delimiter must be type str and cannot be empty"
-        )
+        node1 = TextNode("This is a bold word.", TextType.TEXT)
+        with self.assertRaises(ValueError):
+            split_nodes_delimiter([node1], None, TextType.BOLD)
+        with self.assertRaises(ValueError):
+            split_nodes_delimiter([node1], 123, TextType.BOLD)
 
     def test_invalid_text_type(self):
-        with self.assertRaises(ValueError) as cm:
-            split_nodes_delimiter(
-                [TextNode("Lorem Ipsum lorek", TextType.TEXT)],
-                "*",
-                "italic",
-            )
-        self.assertEqual(
-            str(cm.exception), "text_type must be class TextType and cannot be empty"
-        )
-
-    def test_invalid_old_nodes(self):
-        with self.assertRaises(ValueError) as cm:
-            split_nodes_delimiter(
-                ["Lorem ipsum lorek", TextType.TEXT],
-                "*",
-                TextType.ITALIC,
-            )
-        self.assertEqual(str(cm.exception), "The list must contain TextNode")
+        node1 = TextNode("This is a bold word.", TextType.TEXT)
+        with self.assertRaises(ValueError):
+            split_nodes_delimiter([node1], "**", None)
+        with self.assertRaises(TypeError):
+            split_nodes_delimiter([node1], "**", "not_a_TextType")
 
 
 class test_extract_link(unittest.TestCase):
@@ -79,18 +76,18 @@ class test_extract_link(unittest.TestCase):
         self.assertEqual(split_nodes_link([node]), node2)
 
     def test_invalid_text_node(self):
-        with self.assertRaises(ValueError) as cm:
+        with self.assertRaises(TypeError) as cm:
             split_nodes_link(
                 ["This is a youtube [link](https://www.youtube.com)", TextType.TEXT]
             )
-        self.assertEqual(str(cm.exception), "The list must contain TextNode")
+        self.assertEqual(str(cm.exception), "The list must only contain TextNode")
 
     def test_invalid_old_nodes(self):
-        with self.assertRaises(TypeError) as cm:
+        with self.assertRaises(ValueError) as cm:
             split_nodes_link(
                 {"link": "https://www.youtube.com", "text_type": TextType.TEXT}
             )
-        self.assertEqual(str(cm.exception), "old_nodes must be a list")
+        self.assertEqual(str(cm.exception), "Input must be type list")
 
 
 class test_extract_images(unittest.TestCase):
@@ -101,7 +98,7 @@ class test_extract_images(unittest.TestCase):
         )
         node2 = [
             TextNode("This is an image of a ", TextType.TEXT),
-            TextNode("cute cat", TextType.LINK, "https://www.imgur.com/cat"),
+            TextNode("cute cat", TextType.IMAGE, "https://www.imgur.com/cat"),
             TextNode(" she is very cute", TextType.TEXT),
         ]
         self.assertEqual(split_nodes_image([node]), node2)
