@@ -1,6 +1,13 @@
 import unittest
 
-from markdown_blocks import block_to_block_type, markdown_to_blocks
+from htmlnode import HTMLNode, LeafNode, ParentNode
+from markdown_blocks import (
+    block_to_block_type,
+    markdown_to_blocks,
+    text_to_children,
+    text_to_code,
+    text_to_list,
+)
 
 
 class test_markdown_to_blocks(unittest.TestCase):
@@ -99,6 +106,103 @@ class test_block_to_block_type(unittest.TestCase):
         node = "```print('hello world')``"
         expected_output = "paragraph"
         self.assertEqual(block_to_block_type(node), expected_output)
+
+
+class test_text_to_children(unittest.TestCase):
+    def test_inline_input(self):
+        node = "This **should** be some text.\nAnd this is another line with *another* text."
+        expected_output = [
+            LeafNode(None, "This "),
+            LeafNode("b", "should"),
+            LeafNode(None, "be some text\nAnd this is another line with "),
+            LeafNode("i", "another"),
+            LeafNode(None, " text."),
+        ]
+        self.assertEqual(text_to_children(node), expected_output)
+
+    def test_paragraph_input(self):
+        node = "This is just a normal paragraph with nothing in it."
+        expected_output = [
+            LeafNode("p", "This is just a normal paragraph with nothing in it")
+        ]
+        self.assertEqual(text_to_children(node), expected_output)
+
+
+class test_text_to_list(unittest.TestCase):
+    def test_ordered_list(self):
+        node = "1. list1\n2. list2\n3. list3"
+        expected_output = [
+            LeafNode("li", "list1"),
+            LeafNode("li", "list2"),
+            LeafNode("li", "list3"),
+        ]
+        self.assertEqual(text_to_list(node, "ordered_list"), expected_output)
+
+    def test_unorderd_list(self):
+        node1 = "- list1\n- list2\n- list3"
+        expected_output1 = [
+            LeafNode("li", "list1"),
+            LeafNode("li", "list2"),
+            LeafNode("li", "list3"),
+        ]
+        self.assertEqual(text_to_list(node1, "unordered_list"), expected_output1)
+
+        node2 = "* list1\n* list2\n* list3"
+        expected_output2 = [
+            LeafNode("li", "list1"),
+            LeafNode("li", "list2"),
+            LeafNode("li", "list3"),
+        ]
+        self.assertEqual(text_to_list(node2, "unordered_list"), expected_output2)
+
+    def test_mixed_unordered_list(self):
+        node = "- list1\n* list2\n- list3"
+        expected_output = []
+        self.assertEqual(text_to_list(node, "ordered_list"), expected_output)
+
+    def test_unordered_list_with_bold_italic(self):
+        node = "* **bolded** text\n* text of an *italic*\n* Maybe a *mix* of **both**"
+        expected_output = [
+            ParentNode(
+                "li",
+                [
+                    LeafNode("b", "bolded"),
+                    LeafNode(None, " text"),
+                ],
+            ),
+            ParentNode(
+                "li",
+                [
+                    LeafNode(None, "text of an "),
+                    LeafNode("i", "italic"),
+                ],
+            ),
+            ParentNode(
+                "li",
+                [
+                    LeafNode(None, "Maybe a "),
+                    LeafNode("i", "mix"),
+                    LeafNode(None, " of "),
+                    LeafNode("b", "both"),
+                ],
+            ),
+        ]
+        self.assertEqual(text_to_list(node, "unordered_list"), expected_output)
+
+
+class test_text_to_code(unittest.TestCase):
+    def test_valid_input(self):
+        node = "```python\nprint('hello world')\n# This should print hello world```"
+        expected_output = ParentNode(
+            "pre",
+            [
+                LeafNode(
+                    "```",
+                    "python\nprint('hello world')\n# This should print hello world",
+                )
+            ],
+        )
+        self.assertEqual(text_to_code(node), expected_output)
 
 
 if __name__ == "__main__":
