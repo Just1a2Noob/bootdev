@@ -4,6 +4,11 @@ from htmlnode import HTMLNode, LeafNode
 
 
 class TextType(Enum):
+    """A class to repressent text types of TextNode.
+
+    This class allows you to assing text types to TextNode's.
+    """
+
     TEXT = "text"
     BOLD = "bold"
     ITALIC = "italic"
@@ -11,8 +16,26 @@ class TextType(Enum):
     LINK = "link"
     IMAGE = "image"
 
+    # Additional classes
+    O_LIST = "ordered list"
+    U_LIST = "unordered list"
+    QUOTE = "quote"
+    CODE_BLOCK = "code block"
+
 
 class TextNode:
+    """A class to represent different types of inline text.
+
+    This class acts as an intermediate representation for
+    parsing Markdown text, and outputting HTML.
+
+    Attributes:
+        text (str): The text content of the node
+        text_type (TextType): The type of text this node contains
+        url (str): The url of the link or imag, if the text is link.
+                    Default is None.
+    """
+
     def __init__(self, text, text_type, url=None):
         self.text = text
         self.text_type = text_type
@@ -30,6 +53,15 @@ class TextNode:
 
 
 def text_node_to_html_node(text_node):
+    """Converts a TextNode to LeafNode
+
+    Args:
+        text_node (TextNode): TextNode
+
+    Returns:
+        LeafNode: Changed TextNode to LeafNode with appropriate type
+    """
+
     tag_converter = {
         "text": None,
         "bold": "b",
