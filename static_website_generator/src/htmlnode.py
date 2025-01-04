@@ -1,4 +1,19 @@
 class HTMLNode:
+    """A class representing a 'node' in a HTML document
+
+    The HTMLNode class will represent a "node" in an HTML document tree
+    (like a <p> tag and its contents, or an <a> tag and its contents)
+    and is purpose-built to render itself as HTML.
+
+    Attributes:
+        tag (str): A string representing the HTML tag name (e.g."p", "h1", etc).
+        value (str): A string representing the value of the HTML tag.
+        children (list): A list of HTMLNode objects representing the children
+                            of this node.
+        props (dict): A dictionary of key-value pairs representing the attributes
+                        of HTML tag.
+    """
+
     def __init__(self, tag, value, children=None, props=None):
         if not (isinstance(tag, str) or tag is None):
             raise TypeError("tag must be a string or None")
@@ -41,6 +56,16 @@ class HTMLNode:
 
 
 class LeafNode(HTMLNode):
+    """A class to represent a single HTML tag with no children
+        with the type of HTMLNode
+
+    Attributes:
+        tag (str): A string representing the LeafNode tag name (e.g."p", "h1", etc).
+        value (str): A string representing the value of the HTML tag.
+        props (dict): A dictionary of key-value pairs representing the attributes
+                        of LeafNode tag.
+    """
+
     def __init__(self, tag, value, props=None):
         if not value:  # Ensure value is not empty
             raise ValueError("value cannot be empty")
@@ -72,6 +97,19 @@ class LeafNode(HTMLNode):
 
 
 class ParentNode(HTMLNode):
+    """A class to represent the nesting of HTML nodes inside one another
+
+    This class is used for any HTML node that isn't a 'leaf' node
+    (i.e. it has children) is a 'parent' node.
+
+    Attributes:
+        tag (str): A string representing the HTML tag name (e.g."p", "h1", etc).
+        children (list): A list of HTMLNode objects representing the children
+                            of this node.
+        props (dict): A dictionary of key-value pairs representing the attributes
+                        of ParentNode tag.
+    """
+
     def __init__(self, tag, children, props=None):
         # Check if tag is None
         if tag is None:

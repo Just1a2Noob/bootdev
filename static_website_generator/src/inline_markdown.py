@@ -4,6 +4,16 @@ from textnode import TextNode, TextType
 
 
 def split_nodes_delimiter(old_nodes, delimiter, text_type):
+    """Split TextNode's based on delimiter and text_type.
+
+    Args:
+        old_nodes (list): The list of TextNode's.
+        delimiter (str): The delimiter for markdown syntax.
+        text_type (TextType): The text type of TextNode.
+
+    Returns:
+        list: The list of nodes split based on delimiter.
+    """
     if not isinstance(old_nodes, list):
         raise TypeError("old_nodes must be type of list")
 
@@ -35,6 +45,16 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
 
 
 def split_nodes_image(old_nodes):
+    """Converts a list of TextNode containing alt and url
+        to TextNode(alt, TextType.IMAGE, url).
+
+    Args:
+        old_nodes (list): List containing TextNode's.
+
+    Return:
+        list: The list of TextNode's and
+            any TextNode containing alt and url are changed.
+    """
     if not isinstance(old_nodes, list):
         raise ValueError("Input must be type list")
 
@@ -80,6 +100,16 @@ def split_nodes_image(old_nodes):
 
 
 def split_nodes_link(old_nodes):
+    """Converts a list of TextNode containing alt and url
+        to TextNode(alt, TextType.LINK, url).
+
+    Args:
+        old_nodes (list): List containing TextNode's.
+
+    Return:
+        list: The list of TextNode's and
+            any TextNode containing alt and url are changed.
+    """
     if not isinstance(old_nodes, list):
         raise ValueError("Input must be type list")
 
@@ -126,16 +156,41 @@ def split_nodes_link(old_nodes):
 
 
 def extract_markdown_images(text):
+    """Finds all markdown images in text
+
+    Args:
+        text (str): string containing markdown image syntax
+
+    Return:
+        list: list containing tuple of alt and link
+    """
     matches = re.findall(r"!\[([^\[\]]*)\]\(([^()\s]+)\)", text)
     return matches
 
 
 def extract_markdown_links(text):
+    """Finds all markdown links in text.
+
+    Args:
+        text (str): string containing markdown links syntax.
+
+    Return:
+        list: list containing tuple of alt and link.
+    """
     matches = re.findall(r"(?<!\!)\[([^\[\]]+)\]\(([^()\s]+)\)", text)
     return matches
 
 
 def text_to_textnodes(text):
+    """Converts text to TextNodes.
+
+    Args:
+        text (str): String with markdown syntax.
+
+    Return:
+        list: List of TextNode's, where the TextType is
+            based on markdown syntax of the string.
+    """
     nodes = [TextNode(text, TextType.TEXT)]
     nodes = split_nodes_delimiter(nodes, "**", TextType.BOLD)
     nodes = split_nodes_delimiter(nodes, "*", TextType.ITALIC)
@@ -144,7 +199,3 @@ def text_to_textnodes(text):
     nodes = split_nodes_link(nodes)
 
     return nodes
-
-
-# node = "`code` *should* be **bolded** [link](https://google.com) and ![cutecat](https://i.imgur/cutecat.jpeg)"
-# print((text_to_textnodes(node)))
