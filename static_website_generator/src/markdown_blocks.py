@@ -161,9 +161,13 @@ def markdown_to_htmlnode(markdown):
         # If its not code/list type it just appends
         else:
             children = text_to_children(block)
-            nodes.append(
-                ParentNode(tag=block_type_to_tag[text_type], children=children)
-            )
+
+            if len(children) > 1:
+                nodes.append(
+                    ParentNode(tag=block_type_to_tag[text_type], children=children)
+                )
+            else:
+                nodes.append(LeafNode(tag=block_type_to_tag[text_type], value=block))
 
     results = HTMLNode(tag="div", value=None, children=nodes, props=None)
 
