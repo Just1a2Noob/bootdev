@@ -4,6 +4,7 @@ from htmlnode import HTMLNode, LeafNode, ParentNode
 from markdown_blocks import (
     block_to_block_type,
     markdown_to_blocks,
+    markdown_to_htmlnode,
     text_to_children,
     text_to_code,
     text_to_list,
@@ -203,6 +204,81 @@ class test_text_to_code(unittest.TestCase):
             ],
         )
         self.assertEqual(text_to_code(node), expected_output)
+
+
+class test_markdown_to_htmlnode(unittest.TestCase):
+    def test_valid_input(self):
+        node = """
+        This **code** block, should explain how you should use functions to print hello world
+
+        ```python
+        text = 'Hello World!'
+        print(text)
+        ```
+
+        In this code there are a few things going on:
+
+        1. We assigned the variable named 'text' with a str,
+        2. In that *string* it contains `Hello World`,
+        3. We use print to show the **output** of variable text.
+
+        > Assigning the string to a variable isn't necessary. You can just directly print('Hello World!')
+        """
+
+        expected_output = HTMLNode(
+            "div",
+            None,
+            [
+                ParentNode(
+                    "p",
+                    [
+                        LeafNode(None, "This "),
+                        LeafNode("b", "code"),
+                        LeafNode(
+                            None,
+                            " block, should explain how you should use functions to print hello world",
+                        ),
+                    ],
+                ),
+                ParentNode(
+                    "pre",
+                    [LeafNode("code", "python\ntext = 'Hello World'\nprint(text)")],
+                ),
+                LeafNode("p", "In this code there are a few things going on:"),
+                ParentNode(
+                    "ol",
+                    [
+                        LeafNode(
+                            "li", "We assigned the variable named 'text' with astr,"
+                        ),
+                        ParentNode(
+                            "li",
+                            [
+                                LeafNode(None, "In that "),
+                                LeafNode("b", "string"),
+                                LeafNode(None, " it contains "),
+                                LeafNode("code", "Hello World"),
+                                LeafNode(None, ","),
+                            ],
+                        ),
+                        ParentNode(
+                            "li",
+                            [
+                                LeafNode(None, "We use print to show the "),
+                                LeafNode("b", "output"),
+                                LeafNode(None, " of variable text."),
+                            ],
+                        ),
+                    ],
+                ),
+                LeafNode(
+                    "blockquote",
+                    "Assigning the string to a variable isn't necessary. YOu can just directly print('Hello World!)",
+                ),
+            ],
+        )
+
+        self.assertEqual(markdown_to_htmlnode(node), expected_output)
 
 
 if __name__ == "__main__":
