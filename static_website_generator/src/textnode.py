@@ -61,27 +61,16 @@ def text_node_to_html_node(text_node):
     Returns:
         LeafNode: Changed TextNode to LeafNode with appropriate type
     """
-
-    tag_converter = {
-        "text": None,
-        "bold": "b",
-        "italic": "i",
-        "code": "code",
-        "link": "a",
-        "img": "img",
-    }
-
-    if isinstance(type(text_node), TextNode):
-        raise TypeError("input must be of TextNode class")
-
-    # Creating href link if there is any
-    props = None
-    if text_node.url is not None:
-        props = {"href": text_node.url}
-
-    result = LeafNode(
-        tag=tag_converter[text_node.text_type.value],
-        value=text_node.text,
-        props=props,
-    )
-    return result
+    if text_node.text_type == TextType.TEXT:
+        return LeafNode(None, text_node.text)
+    if text_node.text_type == TextType.BOLD:
+        return LeafNode("b", text_node.text)
+    if text_node.text_type == TextType.ITALIC:
+        return LeafNode("i", text_node.text)
+    if text_node.text_type == TextType.CODE:
+        return LeafNode("code", text_node.text)
+    if text_node.text_type == TextType.LINK:
+        return LeafNode("a", text_node.text, {"href": text_node.url})
+    if text_node.text_type == TextType.IMAGE:
+        return LeafNode("img", "", {"src": text_node.url, "alt": text_node.text})
+    raise ValueError(f"Invalid text type: {text_node.text_type}")
