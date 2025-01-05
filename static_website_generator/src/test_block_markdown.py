@@ -225,9 +225,8 @@ class test_markdown_to_htmlnode(unittest.TestCase):
         > Assigning the string to a variable isn't necessary. You can just directly print('Hello World!')
         """
 
-        expected_output = HTMLNode(
+        expected_output = ParentNode(
             "div",
-            None,
             [
                 ParentNode(
                     "p",
@@ -278,6 +277,34 @@ class test_markdown_to_htmlnode(unittest.TestCase):
             ],
         )
 
+        self.assertEqual(markdown_to_htmlnode(node), expected_output)
+
+    def test_header_block(self):
+        node = "# This should be a first header\n\n### But this is a third header"
+        expected_output = HTMLNode(
+            "div",
+            None,
+            [
+                LeafNode("h1", "This should be a first header"),
+                LeafNode("h3", "But tis is a third header"),
+            ],
+        )
+        self.assertEqual(markdown_to_htmlnode(node), expected_output)
+
+    def test_links(self):
+        node = "WE SHOULD GO BACK [BackHome](/)"
+        expected_output = ParentNode(
+            "div",
+            [
+                ParentNode(
+                    "p",
+                    [
+                        LeafNode(None, "WE SHOULD GO BACK "),
+                        LeafNode("a", "BackHome", {"href": "/"}),
+                    ],
+                )
+            ],
+        )
         self.assertEqual(markdown_to_htmlnode(node), expected_output)
 
 
