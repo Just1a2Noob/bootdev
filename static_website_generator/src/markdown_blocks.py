@@ -126,6 +126,42 @@ def text_to_code(text):
     return ParentNode(tag="pre", children=[LeafNode(tag="```", value=text)])
 
 
+def text_to_header_type(text):
+    """
+    Detects the header type (h1-h6) from markdown syntax.
+    Returns the HTML header tag name or None if not a header.
+
+    Args:
+        text (str): The text to analyze
+
+    Returns:
+        str or None: HTML header tag (h1-h6) or None if not a header
+    """
+    # Strip whitespace
+    text = text.strip()
+
+    # Check if text starts with #
+    if not text.startswith("#"):
+        return None
+
+    # Count consecutive # symbols at start
+    hash_count = 0
+    for char in text:
+        if char == "#":
+            hash_count += 1
+        else:
+            break
+
+    if hash_count > 6:
+        return None
+
+    # Check if there's a space after the # symbols
+    if len(text) <= hash_count or text[hash_count] != " ":
+        return None
+
+    return f"h{hash_count}"
+
+
 def markdown_to_htmlnode(markdown):
     """Converts a full markdown document into a single parent HTMLNode.
 
@@ -143,6 +179,7 @@ def markdown_to_htmlnode(markdown):
         "unordered_list": "ul",
         "ordered_list": "ol",
         "quote": "blockquote",
+        "header": "header",
     }
 
     nodes = []
@@ -158,6 +195,10 @@ def markdown_to_htmlnode(markdown):
                 ParentNode(tag=block_type_to_tag[text_type], children=list_node)
             )
 
+        if text_type == "header":
+            type_header = text_to_header_type(block)
+            nodes.append(LeafNode(tag=type_header, value=block))
+
         # If its not code/list type it just appends
         else:
             children = text_to_children(block)
@@ -169,23 +210,6 @@ def markdown_to_htmlnode(markdown):
             else:
                 nodes.append(LeafNode(tag=block_type_to_tag[text_type], value=block))
 
-    results = HTMLNode(tag="div", value=None, children=nodes, props=None)
+    results = ParentNode(tag="div", children=nodes, props=None)
 
     return results
-
-
-node = """
-This is **bolded** paragraph
-
-```python
-print(hello_world)
-```
-
-
-This is another paragraph with *italic* text and `code` here
-This is the same paragraph on a new line
-
-* This is a list
-* with items
-"""
-# print(markdown_to_htmlnode(node))
