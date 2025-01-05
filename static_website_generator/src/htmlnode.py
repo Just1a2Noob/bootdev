@@ -47,12 +47,11 @@ class HTMLNode:
 
     def props_to_html(self):
         if self.props is None:
-            return None
-
-        result = ""
-        for key, value in self.props.items():
-            result += f'{key}="{value}" '
-        return result.strip()
+            return ""
+        props_html = ""
+        for prop in self.props:
+            props_html += f' {prop}="{self.props[prop]}"'
+        return props_html
 
 
 class LeafNode(HTMLNode):
@@ -67,11 +66,8 @@ class LeafNode(HTMLNode):
     """
 
     def __init__(self, tag, value, props=None):
-        if not value:  # Ensure value is not empty
+        if value is None:  # Ensure value is not empty
             raise ValueError("value cannot be empty")
-        if value is str:
-            if len(value) < 1:
-                raise ValueError("value cannot be empty")
 
         super().__init__(tag, value, props=props)
 
@@ -86,14 +82,11 @@ class LeafNode(HTMLNode):
         )
 
     def to_html(self):
-        props = super().props_to_html()
-
+        if self.value is None:
+            raise ValueError("Invalid HTML: no value")
         if self.tag is None:
             return self.value
-
-        if props is None:
-            return f"<{self.tag}>{self.value}</{self.tag}>"
-        return f"<{self.tag} {props}>{self.value}</{self.tag}>"
+        return f"<{self.tag}{self.props_to_html()}>{self.value}</{self.tag}>"
 
 
 class ParentNode(HTMLNode):
@@ -136,11 +129,12 @@ class ParentNode(HTMLNode):
         return f"ParentNode({self.tag}, {self.children}), {self.props}"
 
     def to_html(self):
-        result = ""
+        if self.tag is None:
+            raise ValueError("Invalid HTML: no tag")
+        if self.children is None:
+            raise ValueError("Invalid HTML: no children")
+        children_html = ""
         for child in self.children:
-            if not all(isinstance(child, LeafNode) for child in self.children):
-                raise ValueError("children inside list has to be type LeafNode")
-            else:
-                result += child.to_html()
+            children_html += child.to_html()
 
-        return f"<{self.tag}>{result}</{self.tag}>"
+        return f"<{self.tag}{self.props_to_html()}>{children_html}</{self.tag}>"
