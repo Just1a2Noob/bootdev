@@ -4,18 +4,10 @@ import shutil
 from generate_page import generate_pages_recursive
 
 # Change the paths here
-dir_path_static = os.path.expanduser(
-    "~/Documents/github/bootdev/static_website_generator/static/"
-)
-dir_path_public = os.path.expanduser(
-    "~/Documents/github/bootdev/static_website_generator/public/"
-)
-dir_path_content = os.path.expanduser(
-    "~/Documents/github/bootdev/static_website_generator/content"
-)
-template_path = os.path.expanduser(
-    "~/Documents/github/bootdev/static_website_generator/template.html"
-)
+dir_path_static = os.path.expanduser("./static")
+dir_path_public = os.path.expanduser("./public")
+dir_path_content = os.path.expanduser("./content")
+template_path = os.path.expanduser("./template.html")
 
 
 def copy_files_recursive(source_dir_path, destination_dir_path):
