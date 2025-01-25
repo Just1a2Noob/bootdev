@@ -45,7 +45,7 @@ class Maze:
         x1 = self._x1 + i * self.cell_size_x
         y1 = self._y1 + j * self.cell_size_y
         x2 = x1 + self.cell_size_x
-        y2 = x2 + self.cell_size_y
+        y2 = y1 + self.cell_size_y
 
         self._cells[i][j].draw(x1, y1, x2, y2)
         self._animate()
