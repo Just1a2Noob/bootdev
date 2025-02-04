@@ -56,6 +56,56 @@ class Maze:
         self._cells[self.num_cols - 1][self.num_rows - 1].has_bottom_wall = False
         self._draw_cell(self.num_cols - 1, self.num_rows - 1)
 
+    # Helper function for _break_walls_r
+    def _index_finder(self, lists, cell):
+        for sub_list in lists:
+            if char in sub_list:
+                return (sub_list.index(cell), lists.index(sub_list))
+        raise ValueError("Cell is not within the list")
+
+    def _break_walls_r(self, i, j):
+        self._cells[i][j].visited = True
+
+        to_visit = []
+
+        # Neighbours
+        left = [i - 1, j]
+        right = [i + 1, j]
+        up = [i, j - 1]
+        down = [i, j + 1]
+        neighbours = [left, right, down, up]
+        for n in neighbours:
+            try:
+                to_visit.append(self._cells[n[0]][n[1]])
+            except IndexError:
+                continue
+
+        # Check if it has any neighbours at all
+        if len(to_visit) < 1:
+            self._draw_cell(i, j)
+            return
+        else:
+            curr_cell = self._cells[i][j]
+            chosen_cell = random.choice(to_visit)
+            chosen_cell_index = self._index_finder(self._cells, chosen_cell)
+
+            # if conditions for breaking walls:
+            if i > chosen_cell_index[0]:
+                curr_cell.has_left_wall = False
+                chosen_cell.has_right_wall = False
+            if i < chosen_cell_index[0]:
+                curr_cell.has_right_wall = False
+                chosen_cell.has_left_wall = False
+
+            if j > chosen_cell_index[1]:
+                curr_cell.has_bottom_wall = False
+                chosen_cell.has_top_wall = False
+            if j < chosen_cell_index[1]:
+                curr_cell.has_top_wall = False
+                chosen_cell.has_bottom_wall = False
+
+            self._break_walls_r(chosen_cell[0], chosen_cell[1])
+
     def _animate(self):
         if self._win is None:
             return
