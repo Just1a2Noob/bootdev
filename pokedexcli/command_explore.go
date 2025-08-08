@@ -10,13 +10,15 @@ func commandExplore(cfg *config) error {
 	} else {
 		id = cfg.parameter
 	}
-	pokemonResp, err := cfg.pokeapiClient.ExploreLocations(&id)
+	pokemonResp, err := cfg.pokeapiClient.ExploreLocations(id)
 	if err != nil {
 		return err
 	}
 
+	fmt.Printf("Exploring %v...\n", cfg.parameter)
+	fmt.Println("Found pokemon:")
 	for _, pokemon := range pokemonResp.PokemonEncounters {
-		fmt.Println(pokemon.Pokemon.Name)
+		fmt.Printf("- %v\n", pokemon.Pokemon.Name)
 	}
 
 	return nil

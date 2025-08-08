@@ -14,10 +14,12 @@ type config struct {
 	nextLocationsURL *string
 	prevLocationsURL *string
 	parameter        string
+	pokedex          pokeapi.Pokedex
 }
 
 func startRepl(cfg *config) {
 	reader := bufio.NewScanner(os.Stdin)
+	cfg.pokedex = pokeapi.Pokedex{}
 	for {
 		fmt.Print("Pokedex > ")
 		reader.Scan()
@@ -90,6 +92,11 @@ func getCommands() map[string]cliCommand {
 			name:        "explore",
 			description: "Finds all pokemons given the location",
 			callback:    commandExplore,
+		},
+		"catch": {
+			name:        "catch",
+			description: "Catches the specified pokemon",
+			callback:    commandCatch,
 		},
 	}
 }

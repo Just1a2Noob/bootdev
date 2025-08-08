@@ -7,9 +7,9 @@ import (
 )
 
 // Explore Location
-func (c *Client) ExploreLocations(id *string) (RespIDLocations, error) {
+func (c *Client) ExploreLocations(id string) (RespIDLocations, error) {
 
-	url := baseURL + "/" + *id
+	url := baseURL + "/location-area/" + id
 
 	if val, ok := c.cache.Get(url); ok {
 		pokemonResp := RespIDLocations{}
