@@ -14,12 +14,11 @@ type config struct {
 	nextLocationsURL *string
 	prevLocationsURL *string
 	parameter        string
-	pokedex          pokeapi.Pokedex
+	pokedex          map[string]pokeapi.Pokemon
 }
 
 func startRepl(cfg *config) {
 	reader := bufio.NewScanner(os.Stdin)
-	cfg.pokedex = pokeapi.Pokedex{}
 	for {
 		fmt.Print("Pokedex > ")
 		reader.Scan()

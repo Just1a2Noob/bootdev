@@ -9,10 +9,6 @@ import (
 	"strings"
 )
 
-func (p *Pokedex) Add(pokemon *Pokemon) {
-	p.pokedex[pokemon.Name] = *pokemon
-}
-
 func (c *Client) PokemonStats(name string) (Pokemon, error) {
 	url := baseURL + "/pokemon/" + name
 
@@ -50,7 +46,7 @@ func (c *Client) PokemonStats(name string) (Pokemon, error) {
 	return pokemonResp, err
 }
 
-func (p *Pokedex) CatchResults(pokemon Pokemon) bool {
+func CatchResults(pokemon Pokemon) bool {
 	name := strings.ToLower(pokemon.Name)
 	success_rate := float64(pokemon.BaseExperience) * 0.45
 	results := float64(rand.Intn(pokemon.BaseExperience))

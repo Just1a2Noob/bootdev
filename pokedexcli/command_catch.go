@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"strings"
+
+	"github.com/Just1a2Noob/bootdev/pokedexcli/internal/pokeapi"
 )
 
 func commandCatch(cfg *config) error {
@@ -16,9 +18,9 @@ func commandCatch(cfg *config) error {
 		return err
 	}
 
-	catched := cfg.pokedex.CatchResults(pokemonResp)
+	catched := pokeapi.CatchResults(pokemonResp)
 	if catched {
-		cfg.pokedex.Add(&pokemonResp)
+		cfg.pokedex[pokemonResp.Name] = pokemonResp
 	}
 
 	return nil
