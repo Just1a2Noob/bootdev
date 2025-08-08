@@ -18,6 +18,7 @@ func commandCatch(cfg *config) error {
 		return err
 	}
 
+	fmt.Printf("Throwing a Pokeball at %s...\n", pokemonResp.Name)
 	catched := pokeapi.CatchResults(pokemonResp)
 	if catched {
 		cfg.pokedex[pokemonResp.Name] = pokemonResp
