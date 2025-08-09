@@ -23,6 +23,7 @@ func commandCatch(cfg *config) error {
 	if catched {
 		cfg.pokedex[pokemonResp.Name] = pokemonResp
 	}
+	fmt.Println("You may now inspect it with the inspect command")
 
 	return nil
 }
