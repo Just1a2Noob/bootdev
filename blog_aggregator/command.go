@@ -4,9 +4,11 @@ import (
 	"errors"
 
 	"github.com/Just1a2Noob/bootdev/blog_aggregator/internal/config"
+	"github.com/Just1a2Noob/bootdev/blog_aggregator/internal/database"
 )
 
 type state struct {
+	db         *database.Queries
 	ptr_to_cfg *config.Config
 }
 
@@ -17,19 +19,6 @@ type command struct {
 
 type commands struct {
 	commands map[string]func(*state, command) error
-}
-
-func handlerLogin(s *state, cmd command) error {
-	if len(cmd.Args) == 0 {
-		return errors.New("Username is required")
-	}
-
-	err := s.ptr_to_cfg.SetUser(cmd.Args[0])
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func (c *commands) run(s *state, cmd command) error {
