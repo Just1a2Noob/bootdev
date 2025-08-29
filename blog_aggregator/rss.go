@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"encoding/xml"
-	"fmt"
 	"html"
 	"io"
 	"net/http"
@@ -27,43 +26,34 @@ type RSSItem struct {
 }
 
 func fetchFeed(ctx context.Context, feedURL string) (*RSSFeed, error) {
-
-	defaultHandler := RSSFeed{}
-
-	if len(feedURL) < 3 {
-		return &defaultHandler, fmt.Errorf("URL is invalid")
-	}
-
-	req, err := http.NewRequestWithContext(ctx, "GET", feedURL, nil)
-	if err != nil {
-		return &defaultHandler, err
-	}
-
-	client := http.Client{
+	httpClient := http.Client{
 		Timeout: 10 * time.Second,
 	}
-	res, err := client.Do(req)
+	req, err := http.NewRequestWithContext(ctx, "GET", feedURL, nil)
 	if err != nil {
-		return &defaultHandler, err
+		return nil, err
 	}
 
-	defer res.Body.Close()
-
-	res.Header.Set("User-Agent", "gator")
-
-	data, err := io.ReadAll(res.Body)
+	req.Header.Set("User-Agent", "gator")
+	resp, err := httpClient.Do(req)
 	if err != nil {
-		return &defaultHandler, err
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	dat, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
 	}
 
 	var rssFeed RSSFeed
-	if err := xml.Unmarshal(data, &rssFeed); err != nil {
-		return &defaultHandler, err
+	err = xml.Unmarshal(dat, &rssFeed)
+	if err != nil {
+		return nil, err
 	}
 
 	rssFeed.Channel.Title = html.UnescapeString(rssFeed.Channel.Title)
 	rssFeed.Channel.Description = html.UnescapeString(rssFeed.Channel.Description)
-
 	for i, item := range rssFeed.Channel.Item {
 		item.Title = html.UnescapeString(item.Title)
 		item.Description = html.UnescapeString(item.Description)

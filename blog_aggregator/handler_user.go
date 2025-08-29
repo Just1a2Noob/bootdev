@@ -26,7 +26,7 @@ func handlerRegister(s *state, cmd command) error {
 		return fmt.Errorf("couldn't create user: %w", err)
 	}
 
-	err = s.ptr_to_cfg.SetUser(user.Name)
+	err = s.cfg.SetUser(user.Name)
 	if err != nil {
 		return fmt.Errorf("couldn't set current user: %w", err)
 	}
@@ -47,7 +47,7 @@ func handlerLogin(s *state, cmd command) error {
 		return fmt.Errorf("couldn't find user: %w", err)
 	}
 
-	err = s.ptr_to_cfg.SetUser(name)
+	err = s.cfg.SetUser(name)
 	if err != nil {
 		return fmt.Errorf("couldn't set current user: %w", err)
 	}
@@ -56,23 +56,22 @@ func handlerLogin(s *state, cmd command) error {
 	return nil
 }
 
+func handlerListUsers(s *state, cmd command) error {
+	users, err := s.db.GetUsers(context.Background())
+	if err != nil {
+		return fmt.Errorf("couldn't list users: %w", err)
+	}
+	for _, user := range users {
+		if user.Name == s.cfg.CurrentUserName {
+			fmt.Printf("* %v (current)\n", user.Name)
+			continue
+		}
+		fmt.Printf("* %v\n", user.Name)
+	}
+	return nil
+}
+
 func printUser(user database.User) {
 	fmt.Printf(" * ID:      %v\n", user.ID)
 	fmt.Printf(" * Name:    %v\n", user.Name)
-}
-
-func handleGetUsers(s *state, cmd command) error {
-	users, err := s.db.GetUsers(context.Background())
-	if err != nil {
-		return fmt.Errorf("Getting users was unsuccessful: %v", err)
-	}
-
-	for _, user := range users {
-		if user.Name == s.ptr_to_cfg.CurrentUserName {
-			fmt.Printf("* %s (current)\n", user.Name)
-		}
-		fmt.Printf("* %s\n", user.Name)
-	}
-
-	return nil
 }
