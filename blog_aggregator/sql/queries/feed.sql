@@ -10,6 +10,10 @@ SELECT * FROM feeds;
 SELECT * FROM feeds
 WHERE url = $1;
 
+-- name: FindFeedID :one
+SELECT * FROM feeds
+WHERE id = $1;
+
 -- name: CreateFeedFollow :one
 WITH inserted_feed_follow AS (
   INSERT INTO feed_follows (id, created_at, updated_at, user_id, feed_id)
@@ -30,3 +34,7 @@ INNER JOIN users
   ON iff.user_id = users.id
 INNER JOIN feeds 
   ON iff.feed_id = feeds.id;
+
+-- name: GetFollowForUser :many
+SELECT * FROM feed_follows 
+WHERE user_id = $1;

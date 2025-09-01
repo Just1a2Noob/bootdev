@@ -128,6 +128,59 @@ func (q *Queries) FindFeed(ctx context.Context, url string) (Feed, error) {
 	return i, err
 }
 
+const findFeedID = `-- name: FindFeedID :one
+SELECT id, created_at, updated_at, name, url, user_id FROM feeds
+WHERE id = $1
+`
+
+func (q *Queries) FindFeedID(ctx context.Context, id uuid.UUID) (Feed, error) {
+	row := q.db.QueryRowContext(ctx, findFeedID, id)
+	var i Feed
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Name,
+		&i.Url,
+		&i.UserID,
+	)
+	return i, err
+}
+
+const getFollowForUser = `-- name: GetFollowForUser :many
+SELECT id, created_at, updated_at, user_id, feed_id FROM feed_follows 
+WHERE user_id = $1
+`
+
+func (q *Queries) GetFollowForUser(ctx context.Context, userID uuid.UUID) ([]FeedFollow, error) {
+	rows, err := q.db.QueryContext(ctx, getFollowForUser, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []FeedFollow
+	for rows.Next() {
+		var i FeedFollow
+		if err := rows.Scan(
+			&i.ID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.UserID,
+			&i.FeedID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listFeeds = `-- name: ListFeeds :many
 SELECT id, created_at, updated_at, name, url, user_id FROM feeds
 `
