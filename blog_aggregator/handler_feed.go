@@ -76,6 +76,8 @@ func handlerFollow(s *state, cmd command) error {
 		return fmt.Errorf("Creating follow entry failed : %s", err)
 	}
 
+	printFollow(follows)
+
 	return nil
 }
 
@@ -88,7 +90,7 @@ func printFeed(feed database.Feed) {
 	fmt.Printf("* UserID:        %s\n", feed.UserID)
 }
 
-func printFollow(follow database.FeedFollow) {
+func printFollow(follow database.CreateFeedFollowRow) {
 	fmt.Printf("* ID:            %s\n", follow.ID)
 	fmt.Printf("* Created:       %v\n", follow.CreatedAt)
 	fmt.Printf("* Updated:       %v\n", follow.UpdatedAt)
