@@ -22,8 +22,8 @@ func main() {
 		http.FileServer(http.Dir(filepathRoot)),
 	)))
 
-	mux.HandleFunc("GET /api/metrics", apicfg.handlerMetrics)
-	mux.HandleFunc("POST /api/reset", apicfg.handlerResetHits)
+	mux.HandleFunc("GET /admin/metrics", apicfg.handlerMetrics)
+	mux.HandleFunc("POST /admin/reset", apicfg.handlerResetHits)
 	mux.HandleFunc("GET /api/healthz", handlerReadiness)
 
 	srv := &http.Server{
