@@ -9,6 +9,8 @@ func main() {
 	mux := http.NewServeMux()
 	server := http.Server{}
 
+	mux.Handle("/", http.FileServer(http.Dir(".")))
+
 	server.Addr = ":8080"
 	server.Handler = mux
 
