@@ -12,11 +12,6 @@ import (
 	_ "github.com/lib/pq"
 )
 
-type apiConfig struct {
-	fileserverHits atomic.Int32
-	database       *database.Queries
-}
-
 func main() {
 	dbURL := os.Getenv("DB_URL")
 	db, err := sql.Open("postgres", dbURL)
@@ -28,20 +23,22 @@ func main() {
 
 	const filepathRoot = "."
 	const port = "8080"
-	apicfg := apiConfig{
-		fileserverHits: atomic.Int32{},
-		database:       dbQueries,
+
+	apicfg := api.ApiConfig{
+		FileserverHits: atomic.Int32{},
+		Database:       *dbQueries,
 	}
 
 	mux := http.NewServeMux()
-	mux.Handle("/app/", http.StripPrefix("/app", apicfg.middlewareMetricsInc(
+	mux.Handle("/app/", http.StripPrefix("/app", apicfg.MiddlewareMetricsInc(
 		http.FileServer(http.Dir(filepathRoot)),
 	)))
 
-	mux.HandleFunc("GET /admin/metrics", apicfg.handlerMetrics)
-	mux.HandleFunc("POST /admin/reset", apicfg.handlerResetHits)
+	mux.HandleFunc("GET /admin/metrics", apicfg.HandlerMetrics)
+	mux.HandleFunc("POST /admin/reset", apicfg.HandlerResetHits)
 	mux.HandleFunc("GET /api/healthz", handlerReadiness)
 	mux.HandleFunc("POST /api/validate_chirp", api.HandlerValidate)
+	mux.HandleFunc("POST /api/users", apicfg.HandlerCreateUser)
 
 	srv := &http.Server{
 		Addr:    ":" + port,
