@@ -1,4 +1,4 @@
-package main
+package api
 
 import (
 	"encoding/json"
@@ -33,7 +33,7 @@ func (e ValidationError) Error() string {
 	return e.Message
 }
 
-func handlerValidate(w http.ResponseWriter, r *http.Request) {
+func HandlerValidate(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	chirpReq, err := parseRequest(r)
