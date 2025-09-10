@@ -41,6 +41,7 @@ func handlerValidate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Validate chirp content
 	if err := ValidateChirp(chirpReq.Body); err != nil {
 		if validationErr, ok := err.(ValidationError); ok {
 			ErrorResponse(w, validationErr.Message, validationErr.Code)
