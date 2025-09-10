@@ -9,6 +9,8 @@ import (
 
 const MaxChirpLength = 140
 
+var profanities = []string{"kerfuffle", "sharbert", "fornax"}
+
 // Request and Response types
 type chirpRequest struct {
 	Body string `json:"body"`
@@ -17,6 +19,7 @@ type chirpRequest struct {
 type APIResponse struct {
 	Valid bool   `json:"valid,omitempty"`
 	Error string `json:"error,omitempty"`
+	Body  string `json:"body"`
 }
 
 // Custom error Handling
@@ -51,7 +54,7 @@ func handlerValidate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	SuccessResponse(w)
+	SuccessResponse(w, chirpReq)
 }
 
 func parseRequest(r *http.Request) (*chirpRequest, error) {
@@ -90,8 +93,25 @@ func ValidateChirp(body string) error {
 	return nil
 }
 
-func SuccessResponse(w http.ResponseWriter) {
-	response := APIResponse{Valid: true}
+func ProfaneChirp(body string) string {
+	str_arr := strings.Split(body, " ")
+
+	for i, str := range str_arr {
+		lower_str := strings.ToLower(str)
+		for _, profane := range profanities {
+			if strings.Contains(lower_str, profane) {
+				str_arr[i] = "****"
+				break
+			}
+		}
+	}
+
+	return strings.Join(str_arr, " ")
+}
+
+func SuccessResponse(w http.ResponseWriter, req *chirpRequest) {
+	cleaned_text := ProfaneChirp(req.Body)
+	response := APIResponse{Body: cleaned_text}
 
 	data, err := json.Marshal(response)
 	if err != nil {
