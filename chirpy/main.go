@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -9,10 +10,13 @@ import (
 
 	"github.com/Just1a2Noob/bootdev/chirpy/internal/database"
 	"github.com/Just1a2Noob/bootdev/chirpy/packages/api"
+	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
 
 func main() {
+	godotenv.Load()
+	fmt.Printf("DB_URL: %s\n", os.Getenv("DB_URL"))
 	dbURL := os.Getenv("DB_URL")
 	db, err := sql.Open("postgres", dbURL)
 	if err != nil {
@@ -35,10 +39,12 @@ func main() {
 	)))
 
 	mux.HandleFunc("GET /admin/metrics", apicfg.HandlerMetrics)
-	mux.HandleFunc("POST /admin/reset", apicfg.HandlerResetHits)
+
+	mux.HandleFunc("POST /admin/reset", apicfg.HandlerDeleteUsers)
 	mux.HandleFunc("GET /api/healthz", handlerReadiness)
-	mux.HandleFunc("POST /api/validate_chirp", api.HandlerValidate)
+	mux.HandleFunc("POST /api/validate_chirp", apicfg.HandlerValidate)
 	mux.HandleFunc("POST /api/users", apicfg.HandlerCreateUser)
+	mux.HandleFunc("POST /api/chirps", apicfg.HandlerAddChirp)
 
 	srv := &http.Server{
 		Addr:    ":" + port,
