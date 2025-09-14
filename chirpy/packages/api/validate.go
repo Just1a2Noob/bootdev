@@ -1,10 +1,15 @@
 package api
 
 import (
+	"context"
 	"encoding/json"
 	"log"
 	"net/http"
 	"strings"
+	"time"
+
+	"github.com/Just1a2Noob/bootdev/chirpy/internal/database"
+	"github.com/google/uuid"
 )
 
 const MaxChirpLength = 140
@@ -13,13 +18,12 @@ var profanities = []string{"kerfuffle", "sharbert", "fornax"}
 
 // Request and Response types
 type chirpRequest struct {
-	Body string `json:"body"`
+	Body string `json:"body,omitempty"`
+	User string `json:"user"`
 }
 
 type APIResponse struct {
-	Valid bool   `json:"valid,omitempty"`
 	Error string `json:"error,omitempty"`
-	Body  string `json:"body"`
 }
 
 // Custom error Handling
@@ -33,7 +37,7 @@ func (e ValidationError) Error() string {
 	return e.Message
 }
 
-func HandlerValidate(w http.ResponseWriter, r *http.Request) {
+func (cfg *ApiConfig) HandlerValidate(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	chirpReq, err := parseRequest(r)
@@ -54,7 +58,7 @@ func HandlerValidate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	SuccessResponse(w, chirpReq)
+	SuccessResponse(w, chirpReq, cfg)
 }
 
 func parseRequest(r *http.Request) (*chirpRequest, error) {
@@ -109,14 +113,30 @@ func ProfaneChirp(body string) string {
 	return strings.Join(str_arr, " ")
 }
 
-func SuccessResponse(w http.ResponseWriter, req *chirpRequest) {
+func SuccessResponse(w http.ResponseWriter, req *chirpRequest, cfg *ApiConfig) {
 	cleaned_text := ProfaneChirp(req.Body)
-	response := APIResponse{Body: cleaned_text}
+	response := chirpRequest{
+		Body: cleaned_text,
+		User: req.User,
+	}
 
 	data, err := json.Marshal(response)
 	if err != nil {
 		log.Printf("Error in marshaling valid response : %s", err)
 		ErrorResponse(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	// Saves chirpReq in chirps database
+	_, err = cfg.Database.CreateChirps(context.Background(), database.CreateChirpsParams{
+		ID:        uuid.New(),
+		CreatedAt: time.Now().UTC(),
+		UpdatedAt: time.Now().UTC(),
+		Body:      req.Body,
+		UserID:    uuid.MustParse(req.User),
+	})
+	if err != nil {
+		ErrorResponse(w, "Error inserting chirp to database", http.StatusInternalServerError)
 		return
 	}
 

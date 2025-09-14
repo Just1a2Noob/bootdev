@@ -3,7 +3,7 @@ package api
 import (
 	"context"
 	"encoding/json"
-	"log"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -25,27 +25,35 @@ func (cfg *ApiConfig) HandlerCreateUser(w http.ResponseWriter, r *http.Request) 
 
 	err := decoder.Decode(&emailReq)
 	if err != nil {
-		log.Fatalf("Error decoding email : %v", err)
-		return
+		ErrorResponse(w, fmt.Sprintf("Error in decoding json request : %s", err), http.StatusNotAcceptable)
 	}
+
+	email := emailReq.Email
 
 	user, err := cfg.Database.CreateUser(context.Background(), database.CreateUserParams{
 		ID:        uuid.New(),
 		CreatedAt: time.Now().UTC(),
 		UpdatedAt: time.Now().UTC(),
-		Email:     emailReq.Email,
+		Email:     email,
 	})
 	if err != nil {
-		log.Fatalf("Error creating email to database : %s", err)
+		ErrorResponse(w, fmt.Sprintf("Error creating user to database : %v", err), http.StatusInternalServerError)
 		return
 	}
 
 	data, err := json.Marshal(user)
 	if err != nil {
-		log.Fatalf("Error encoding email to json : %s", err)
+		ErrorResponse(w, "Error encoding user entry to json", http.StatusInternalServerError)
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
+	w.WriteHeader(http.StatusCreated)
 	w.Write(data)
+}
+
+func (cfg *ApiConfig) HandlerDeleteUsers(w http.ResponseWriter, r *http.Request) {
+	err := cfg.Database.DeleteUsers(context.Background())
+	if err != nil {
+		ErrorResponse(w, fmt.Sprintf("Error in deleting users from database : %s", err), http.StatusInternalServerError)
+	}
 }
