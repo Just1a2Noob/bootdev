@@ -1,0 +1,17 @@
+[
+  {
+    "ID": "ff630a99-8b89-4b6f-8c90-36eeb8e62034",
+    "CreatedAt": "2025-09-15T03:08:37.73998Z",
+    "UpdatedAt": "2025-09-15T03:08:37.73998Z",
+    "Body": "This CLI kinda lit ngl",
+    "UserID": "e6763550-b228-40dd-9a0b-54ae95cb4d30"
+  },
+  {
+    "ID": "50eecd79-e7d0-4bd4-b7bc-72192f567d26",
+    "CreatedAt": "2025-09-15T03:10:51.124688Z",
+    "UpdatedAt": "2025-09-15T03:10:51.124688Z",
+    "Body": "Hello, world!",
+    "UserID": "0940efb9-596a-4832-b858-67a0197a2c22"
+  }
+]
+
