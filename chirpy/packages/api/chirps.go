@@ -82,3 +82,25 @@ func (cfg *ApiConfig) HandlerGetChirps(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Write(data)
 }
+
+func (cfg *ApiConfig) HandlerGetChirpID(w http.ResponseWriter, r *http.Request) {
+	chirpID, err := uuid.Parse(r.PathValue("chirpID"))
+	if err != nil {
+		ErrorResponse(w, fmt.Sprintf("Error parsing chirpID : %s", err), http.StatusInternalServerError)
+		return
+	}
+
+	chirpDB, err := cfg.Database.GetChirpID(context.Background(), chirpID)
+	if err != nil {
+		ErrorResponse(w, fmt.Sprintf("Chirp ID did not match with database : %s", err), http.StatusBadRequest)
+		return
+	}
+
+	data, err := json.Marshal(chirpDB)
+	if err != nil {
+		ErrorResponse(w, fmt.Sprintf("Error marshalling chirp to json : %s", err), http.StatusInternalServerError)
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write(data)
+}
