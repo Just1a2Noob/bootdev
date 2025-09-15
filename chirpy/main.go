@@ -46,6 +46,7 @@ func main() {
 	mux.HandleFunc("POST /api/users", apicfg.HandlerCreateUser)
 	mux.HandleFunc("POST /api/chirps", apicfg.HandlerAddChirp)
 	mux.HandleFunc("GET /api/chirps", apicfg.HandlerGetChirps)
+	mux.HandleFunc("GET /api/chirps/{chirpID}", apicfg.HandlerGetChirpID)
 
 	srv := &http.Server{
 		Addr:    ":" + port,
