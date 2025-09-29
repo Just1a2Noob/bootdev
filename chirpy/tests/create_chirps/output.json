@@ -1,0 +1,4 @@
+{
+  "error": "Error getting authorization header: malformed authorization header, expected 'Bearer \u003ctoken\u003e'"
+}
+
