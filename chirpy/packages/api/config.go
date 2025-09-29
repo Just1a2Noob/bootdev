@@ -15,8 +15,9 @@ import (
 
 // Config holds application configuration
 type ApiConfig struct {
-	FileserverHits atomic.Int32     `JSON:"fileserver_hits"`
-	Database       database.Queries `JSON:"db"`
+	FileserverHits atomic.Int32
+	Database       database.Queries
+	Secret         string
 }
 
 func (cfg *ApiConfig) HandlerMetrics(w http.ResponseWriter, r *http.Request) {

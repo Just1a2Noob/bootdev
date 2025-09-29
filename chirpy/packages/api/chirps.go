@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/Just1a2Noob/bootdev/chirpy/internal/auth"
 	"github.com/Just1a2Noob/bootdev/chirpy/internal/database"
 	"github.com/google/uuid"
 )
@@ -26,14 +27,34 @@ func (cfg *ApiConfig) HandlerAddChirp(w http.ResponseWriter, r *http.Request) {
 	err := decoder.Decode(&chirp)
 	if err != nil {
 		ErrorResponse(w, fmt.Sprintf("Error in decoding json request : %s", err), http.StatusNotAcceptable)
+		return
 	}
 
 	cleaned_text := chirp.Body
+
+	// Gets authentication/login user
+	token, err := auth.GetBearerToken(r.Header)
+	if err != nil {
+		ErrorResponse(w, fmt.Sprintf("Error getting authorization header: %s", err), http.StatusInternalServerError)
+		return
+	}
+
+	tokenUserID, err := auth.ValidateJWT(token, cfg.Secret)
+	if err != nil {
+		ErrorResponse(w, fmt.Sprintf("Failed validating JWT token: %s", err), http.StatusBadRequest)
+		return
+	}
 
 	// Parse and validate the user UUID
 	userID, err := uuid.Parse(chirp.UserID)
 	if err != nil {
 		ErrorResponse(w, fmt.Sprintf("Invalid user ID format: %s", err), http.StatusBadRequest)
+		return
+	}
+
+	// Checking if login is the same as userID from chirp
+	if userID != tokenUserID {
+		ErrorResponse(w, fmt.Sprintf("Chirp user ID does not match with Logged in user: %s", err), http.StatusUnauthorized)
 		return
 	}
 
