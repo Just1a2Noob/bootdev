@@ -27,10 +27,12 @@ func main() {
 
 	const filepathRoot = "."
 	const port = "8080"
+	secret := os.Getenv("SECRET")
 
 	apicfg := api.ApiConfig{
 		FileserverHits: atomic.Int32{},
 		Database:       *dbQueries,
+		Secret:         secret,
 	}
 
 	mux := http.NewServeMux()
@@ -47,6 +49,7 @@ func main() {
 	mux.HandleFunc("POST /api/chirps", apicfg.HandlerAddChirp)
 	mux.HandleFunc("GET /api/chirps", apicfg.HandlerGetChirps)
 	mux.HandleFunc("GET /api/chirps/{chirpID}", apicfg.HandlerGetChirpID)
+	mux.HandleFunc("POST /api/login", apicfg.HandlerLoginUser)
 
 	srv := &http.Server{
 		Addr:    ":" + port,
