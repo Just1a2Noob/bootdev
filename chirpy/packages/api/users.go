@@ -21,14 +21,17 @@ type UserRequest struct {
 const DefaultExpires = 3600
 
 type UserResponse struct {
-	ID        uuid.UUID `json:"id"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-	Email     string    `json:"email"`
-	Token     string    `json:"token"`
+	ID            uuid.UUID `json:"id"`
+	CreatedAt     time.Time `json:"created_at"`
+	UpdatedAt     time.Time `json:"updated_at"`
+	Email         string    `json:"email"`
+	Token         string    `json:"token"`
+	Refresh_token string    `json:"refresh_token"`
 }
 
 func (cfg *ApiConfig) HandlerCreateUser(w http.ResponseWriter, r *http.Request) {
+
+	// Decodes json response
 	w.Header().Set("Content-Type", "application/json")
 
 	var userReq UserRequest
@@ -42,6 +45,7 @@ func (cfg *ApiConfig) HandlerCreateUser(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	// Define email and hashing password then putting the results in DB
 	email := userReq.Email
 	hashed, err := auth.HashPassword(userReq.Password)
 	if err != nil {
@@ -85,6 +89,7 @@ func (cfg *ApiConfig) HandlerCreateUser(w http.ResponseWriter, r *http.Request) 
 }
 
 func (cfg *ApiConfig) HandlerLoginUser(w http.ResponseWriter, r *http.Request) {
+	// Decodes json response
 	var userReq UserRequest
 
 	decoder := json.NewDecoder(r.Body)
@@ -95,39 +100,66 @@ func (cfg *ApiConfig) HandlerLoginUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Checks if user email exists
 	user, err := cfg.Database.SearchUser(context.Background(), userReq.Email)
 	if err != nil {
 		ErrorResponse(w, fmt.Sprintf("Cannot find email in database : %s", err), http.StatusNotFound)
 		return
 	}
 
+	// Checks password validation
 	err = auth.CheckPasswordHash(userReq.Password, user.HashedPassword)
 	if err != nil {
 		ErrorResponse(w, "Password is wrong, please try again", http.StatusNotFound)
 	}
 
+	// Checks users request expire token time
 	if userReq.Expires_in_seconds < 0 {
 		ErrorResponse(w, "ExpiresAt cannot be negative", http.StatusNotAcceptable)
 		return
 	}
 
+	// Creates tokens with the specified duration
 	token, err := auth.MakeJWT(user.ID, cfg.Secret, time.Duration(userReq.Expires_in_seconds))
 	if err != nil {
 		ErrorResponse(w, fmt.Sprintf("Error creating JWT token: %s", err), http.StatusInternalServerError)
 		return
 	}
 
+	// Validates JWT token
 	_, err = auth.ValidateJWT(token, cfg.Secret)
 	if err != nil {
 		ErrorResponse(w, fmt.Sprintf("Token missmatch with secret: %s", err), http.StatusInternalServerError)
 	}
 
+	// Create a refresh token and inputs to the database
+	refresh_token, err := auth.MakeRefreshTokens()
+	if err != nil {
+		ErrorResponse(w, fmt.Sprintf("Message error creating refresh token: %s", err), http.StatusInternalServerError)
+		return
+	}
+
+	_, err = cfg.Database.CreateRefreshToken(context.Background(), database.CreateRefreshTokenParams{
+		Token:     refresh_token,
+		CreatedAt: time.Now().UTC(),
+		UpdatedAt: time.Now().UTC(),
+		UserID:    user.ID,
+		ExpiresAt: time.Now().UTC().Add(time.Duration(userReq.Expires_in_seconds)),
+	})
+
+	if err != nil {
+		ErrorResponse(w, fmt.Sprintf("Error creating refresh token database input: %s", err), http.StatusInternalServerError)
+		return
+	}
+
+	// Creates a userResponse struct to send back to client
 	userRes := UserResponse{
-		ID:        user.ID,
-		CreatedAt: user.CreatedAt,
-		UpdatedAt: user.UpdatedAt,
-		Email:     user.Email,
-		Token:     token,
+		ID:            user.ID,
+		CreatedAt:     user.CreatedAt,
+		UpdatedAt:     user.UpdatedAt,
+		Email:         user.Email,
+		Token:         token,
+		Refresh_token: refresh_token,
 	}
 
 	data, err := json.Marshal(userRes)
