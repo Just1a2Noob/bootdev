@@ -2,45 +2,87 @@ import json
 
 import requests
 
+ENDPOINT = "http://localhost:8080/api"
 
-def test_login_api_call():
-    endpoint = "http://localhost:8080/api/login"
-    header = {"Content-Type": "application/json"}
 
-    payload = {
+def test_login_and_add_chirp():
+    # Checks login handling
+    login_header = {"Content-Type": "application/json"}
+
+    login_payload = {
         "email": "user@example.com",
         "password": "04225",
     }
 
-    raw_json = json.dumps(payload)
+    login_response = requests.post(
+        ENDPOINT + "/login", headers=login_header, data=json.dumps(login_payload)
+    )
 
-    response = requests.post(endpoint, headers=header, data=raw_json)
+    assert login_response.status_code == 200
 
-    assert response.status_code == 200
+    login_data = json.loads(login_response.text)
+    # Gets the token for adding chirp
+    token = login_data["token"]
 
-    data = json.loads(response.text)
-    add_chirp(data["token"])
-
-
-def add_chirp(token):
-    endpoint = "http://localhost:8080/api/chirps"
-    headers = {
+    # Check add chirp
+    add_chirp_headers = {
         "Content-Type": "application/json",
         "Authorization": "Bearer " + token,
     }
 
-    payload = {
+    add_chirp_payload = {
         "body": "Hello, world!",
         "user_id": "a64515aa-2d04-4f4b-818a-8ade2d9a2924",
     }
-    raw_json = json.dumps(payload)
 
-    response = requests.post(endpoint, headers=headers, data=raw_json)
+    add_chirp_response = requests.post(
+        ENDPOINT + "/chirps",
+        headers=add_chirp_headers,
+        data=json.dumps(add_chirp_payload),
+    )
 
-    assert response.status_code == 201
+    assert add_chirp_response.status_code == 201
 
-    data = json.loads(response.text)
-    print(data)
+    add_chirp_data = json.loads(add_chirp_response.text)
+
+    # Checks if the sent payload is the same with received payload
+    assert add_chirp_data["Body"] == add_chirp_payload["body"]
 
 
-test_login_api_call()
+def test_login_and_add_chirp_fail():
+    # Test checks if login and adding chirp user is different it should fail
+
+    # Checks login handling
+    login_header = {"Content-Type": "application/json"}
+
+    login_payload = {"email": "gislaine@gmail.com", "password": "441201"}
+
+    login_response = requests.post(
+        ENDPOINT + "/login", headers=login_header, data=json.dumps(login_payload)
+    )
+
+    assert login_response.status_code == 200
+
+    login_data = json.loads(login_response.text)
+    # Gets the token for adding chirp
+    token = login_data["token"]
+
+    # Check add chirp
+    add_chirp_headers = {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + token,
+    }
+
+    add_chirp_payload = {
+        "body": "Chirpy is pretty cool",
+        # Different user_id
+        "user_id": "a64515aa-2d04-4f4b-818a-8ade2d9a2924",
+    }
+
+    add_chirp_response = requests.post(
+        ENDPOINT + "/chirps",
+        headers=add_chirp_headers,
+        data=json.dumps(add_chirp_payload),
+    )
+
+    assert add_chirp_response.status_code == 401
