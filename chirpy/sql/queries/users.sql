@@ -15,3 +15,13 @@ DELETE FROM users;
 -- name: SearchUser :one
 SELECT * FROM users
 WHERE email = $1;
+
+
+-- name: SearchUserWithID :one
+SELECT * FROM users
+WHERE id = $1;
+
+-- name: UpdateUser :exec
+UPDATE users 
+SET email = $2, hashed_password = $3, updated_at = $4
+WHERE id = $1;
