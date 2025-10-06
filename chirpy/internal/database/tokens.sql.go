@@ -82,15 +82,18 @@ func (q *Queries) GetUserFromRefreshToken(ctx context.Context, token string) (Re
 }
 
 const revokeUserToken = `-- name: RevokeUserToken :exec
-UPDATE refresh_tokens SET revoked_at = $2 WHERE user_id = $1
+UPDATE refresh_tokens 
+SET revoked_at = $2, updated_at = $3
+WHERE user_id = $1
 `
 
 type RevokeUserTokenParams struct {
 	UserID    uuid.UUID
 	RevokedAt sql.NullTime
+	UpdatedAt time.Time
 }
 
 func (q *Queries) RevokeUserToken(ctx context.Context, arg RevokeUserTokenParams) error {
-	_, err := q.db.ExecContext(ctx, revokeUserToken, arg.UserID, arg.RevokedAt)
+	_, err := q.db.ExecContext(ctx, revokeUserToken, arg.UserID, arg.RevokedAt, arg.UpdatedAt)
 	return err
 }

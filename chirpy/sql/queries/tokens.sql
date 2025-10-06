@@ -21,4 +21,6 @@ SELECT * FROM refresh_tokens
 WHERE token = $1;
 
 -- name: RevokeUserToken :exec
-UPDATE refresh_tokens SET revoked_at = $2 WHERE user_id = $1;
+UPDATE refresh_tokens 
+SET revoked_at = $2, updated_at = $3
+WHERE user_id = $1;
