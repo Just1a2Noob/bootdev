@@ -179,3 +179,23 @@ func (cfg *ApiConfig) HandlerDeleteUsers(w http.ResponseWriter, r *http.Request)
 		ErrorResponse(w, fmt.Sprintf("Error in deleting users from database : %s", err), http.StatusInternalServerError)
 	}
 }
+
+func (cfg *ApiConfig) HandlerDeleteUser(w http.ResponseWriter, r *http.Request) {
+	// Decodes json response
+	var userReq UserRequest
+
+	decoder := json.NewDecoder(r.Body)
+
+	err := decoder.Decode(&userReq)
+	if err != nil {
+		ErrorResponse(w, fmt.Sprintf("Error in decoding json request : %s", err), http.StatusNotAcceptable)
+		return
+	}
+
+	err = cfg.Database.DeleteUserWithEmail(context.Background(), userReq.Email)
+	if err != nil {
+		ErrorResponse(w, fmt.Sprintf("Error in deleting users from database : %s", err), http.StatusInternalServerError)
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}

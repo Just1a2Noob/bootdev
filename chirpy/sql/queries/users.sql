@@ -12,6 +12,10 @@ RETURNING *;
 -- name: DeleteUsers :exec
 DELETE FROM users;
 
+-- name: DeleteUserWithEmail :exec
+DELETE FROM users 
+WHERE email = $1;
+
 -- name: SearchUser :one
 SELECT * FROM users
 WHERE email = $1;
