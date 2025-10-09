@@ -51,8 +51,8 @@ def login_user():
     login_header = {"Content-Type": "application/json"}
 
     login_payload = {
-        "email": "user@example.com",
-        "password": "04225",
+        "email": "gislaine@gmail.com",
+        "password": "441201",
     }
 
     login_response = requests.post(

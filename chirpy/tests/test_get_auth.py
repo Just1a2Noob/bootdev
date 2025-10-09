@@ -10,8 +10,8 @@ def test_login_and_add_chirp():
     login_header = {"Content-Type": "application/json"}
 
     login_payload = {
-        "email": "user@example.com",
-        "password": "04225",
+        "email": "gislaine@gmail.com",
+        "password": "441201",
     }
 
     login_response = requests.post(
@@ -32,7 +32,7 @@ def test_login_and_add_chirp():
 
     add_chirp_payload = {
         "body": "Hello, world!",
-        "user_id": "a64515aa-2d04-4f4b-818a-8ade2d9a2924",
+        "user_id": "275cebdc-3cc0-4e86-927d-09cafe887fab",
     }
 
     add_chirp_response = requests.post(
