@@ -133,4 +133,6 @@ func (cfg *ApiConfig) HandlerDeleteChirp(w http.ResponseWriter, r *http.Request)
 		ErrorResponse(w, fmt.Sprintf("Error deleting chirp : %s", err), http.StatusInternalServerError)
 		return
 	}
+
+	w.WriteHeader(http.StatusNoContent)
 }
