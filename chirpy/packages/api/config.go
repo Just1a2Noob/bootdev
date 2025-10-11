@@ -91,3 +91,6 @@ func ErrorResponse(w http.ResponseWriter, message string, code int) {
 	w.WriteHeader(code)
 	w.Write(data)
 }
+
+// TODO: Create a function to handle user logging check.
+// input(userID) -> checks loggedUser == userID -> output(boolean)

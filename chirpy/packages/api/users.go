@@ -173,6 +173,9 @@ func (cfg *ApiConfig) HandlerLoginUser(w http.ResponseWriter, r *http.Request) {
 	w.Write(data)
 }
 
+// TODO: When deleting users it should have some sort of authentication
+// To see if they have access to these commands
+
 func (cfg *ApiConfig) HandlerDeleteUsers(w http.ResponseWriter, r *http.Request) {
 	err := cfg.Database.DeleteUsers(context.Background())
 	if err != nil {

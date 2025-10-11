@@ -25,6 +25,8 @@ func (cfg *ApiConfig) HandlerUpdateUser(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	// NOTE: Uses token to check login user
+
 	// Gets the header token
 	token, err := auth.GetBearerToken(r.Header)
 	if err != nil {
