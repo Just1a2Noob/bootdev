@@ -27,6 +27,7 @@ type UserResponse struct {
 	Email         string    `json:"email"`
 	Token         string    `json:"token"`
 	Refresh_token string    `json:"refresh_token"`
+	IsChirpyRed   string    `json:"is_chirpy_red"`
 }
 
 func (cfg *ApiConfig) HandlerCreateUser(w http.ResponseWriter, r *http.Request) {
@@ -72,10 +73,11 @@ func (cfg *ApiConfig) HandlerCreateUser(w http.ResponseWriter, r *http.Request) 
 	}
 
 	userRes := UserResponse{
-		ID:        user.ID,
-		CreatedAt: user.CreatedAt,
-		UpdatedAt: user.UpdatedAt,
-		Email:     user.Email,
+		ID:          user.ID,
+		CreatedAt:   user.CreatedAt,
+		UpdatedAt:   user.UpdatedAt,
+		Email:       user.Email,
+		IsChirpyRed: user.IsChirpyRed,
 	}
 
 	data, err := json.Marshal(userRes)
@@ -160,6 +162,7 @@ func (cfg *ApiConfig) HandlerLoginUser(w http.ResponseWriter, r *http.Request) {
 		Email:         user.Email,
 		Token:         token,
 		Refresh_token: refresh_token,
+		IsChirpyRed:   user.IsChirpyRed,
 	}
 
 	data, err := json.Marshal(userRes)

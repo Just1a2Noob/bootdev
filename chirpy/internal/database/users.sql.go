@@ -21,7 +21,7 @@ VALUES (
   $4,
   $5
 )
-RETURNING id, created_at, updated_at, email, hashed_password
+RETURNING id, created_at, updated_at, email, hashed_password, is_chirpy_red
 `
 
 type CreateUserParams struct {
@@ -47,6 +47,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.UpdatedAt,
 		&i.Email,
 		&i.HashedPassword,
+		&i.IsChirpyRed,
 	)
 	return i, err
 }
@@ -71,7 +72,7 @@ func (q *Queries) DeleteUsers(ctx context.Context) error {
 }
 
 const searchUser = `-- name: SearchUser :one
-SELECT id, created_at, updated_at, email, hashed_password FROM users
+SELECT id, created_at, updated_at, email, hashed_password, is_chirpy_red FROM users
 WHERE email = $1
 `
 
@@ -84,12 +85,13 @@ func (q *Queries) SearchUser(ctx context.Context, email string) (User, error) {
 		&i.UpdatedAt,
 		&i.Email,
 		&i.HashedPassword,
+		&i.IsChirpyRed,
 	)
 	return i, err
 }
 
 const searchUserWithID = `-- name: SearchUserWithID :one
-SELECT id, created_at, updated_at, email, hashed_password FROM users
+SELECT id, created_at, updated_at, email, hashed_password, is_chirpy_red FROM users
 WHERE id = $1
 `
 
@@ -102,8 +104,25 @@ func (q *Queries) SearchUserWithID(ctx context.Context, id uuid.UUID) (User, err
 		&i.UpdatedAt,
 		&i.Email,
 		&i.HashedPassword,
+		&i.IsChirpyRed,
 	)
 	return i, err
+}
+
+const setChirpyRed = `-- name: SetChirpyRed :exec
+UPDATE users 
+SET is_chirpy_red = $2
+WHERE id = $1
+`
+
+type SetChirpyRedParams struct {
+	ID          uuid.UUID
+	IsChirpyRed string
+}
+
+func (q *Queries) SetChirpyRed(ctx context.Context, arg SetChirpyRedParams) error {
+	_, err := q.db.ExecContext(ctx, setChirpyRed, arg.ID, arg.IsChirpyRed)
+	return err
 }
 
 const updateUser = `-- name: UpdateUser :exec
