@@ -32,6 +32,8 @@ func (cfg *ApiConfig) HandlerAddChirp(w http.ResponseWriter, r *http.Request) {
 
 	cleaned_text := chirp.Body
 
+	// NOTE: uses Token to check login user
+
 	// Gets authentication/login user
 	token, err := auth.GetBearerToken(r.Header)
 	if err != nil {
@@ -124,4 +126,39 @@ func (cfg *ApiConfig) HandlerGetChirpID(w http.ResponseWriter, r *http.Request) 
 
 	w.WriteHeader(http.StatusOK)
 	w.Write(data)
+}
+
+func (cfg *ApiConfig) HandlerDeleteChirp(w http.ResponseWriter, r *http.Request) {
+	chirpID := uuid.MustParse(r.PathValue("chirpsID"))
+
+	chirps, err := cfg.Database.GetChirpID(context.Background(), chirpID)
+	if err != nil {
+		ErrorResponse(w, fmt.Sprintf("Error getting chirps from chirpID: %s", err), http.StatusBadRequest)
+		return
+	}
+
+	// NOTE: Uses token to check login user
+	token, err := auth.GetBearerToken(r.Header)
+	if err != nil {
+		ErrorResponse(w, fmt.Sprintf("Error getting authorization header: %s", err), http.StatusInternalServerError)
+		return
+	}
+
+	tokenUserID, err := auth.ValidateJWT(token, cfg.Secret)
+	if err != nil {
+		ErrorResponse(w, fmt.Sprintf("Failed validating JWT token: %s", err), http.StatusBadRequest)
+		return
+	}
+
+	// Checking if login is the same as userID from chirp
+	if chirps.UserID != tokenUserID {
+		ErrorResponse(w, fmt.Sprintf("Chirp user ID does not match with Logged in user: %s", err), http.StatusUnauthorized)
+		return
+	}
+
+	err = cfg.Database.DeleteChirpsID(context.Background(), chirpID)
+	if err != nil {
+		ErrorResponse(w, fmt.Sprintf("Error deleting chirp : %s", err), http.StatusInternalServerError)
+		return
+	}
 }
