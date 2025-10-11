@@ -28,7 +28,7 @@ func (cfg *ApiConfig) HandlerUpdateUser(w http.ResponseWriter, r *http.Request) 
 	// Gets the header token
 	token, err := auth.GetBearerToken(r.Header)
 	if err != nil {
-		ErrorResponse(w, fmt.Sprintf("Error getting authorization header: %s", err), http.StatusInternalServerError)
+		ErrorResponse(w, fmt.Sprintf("Error getting authorization header: %s", err), http.StatusNotFound)
 		return
 	}
 
@@ -43,7 +43,7 @@ func (cfg *ApiConfig) HandlerUpdateUser(w http.ResponseWriter, r *http.Request) 
 	// Search the user based on token user ID
 	_, err = cfg.Database.SearchUserWithID(context.Background(), tokenUserID)
 	if err != nil {
-		ErrorResponse(w, "Error token provided does not have a matching id", http.StatusInternalServerError)
+		ErrorResponse(w, "Error token provided does not have a matching id", http.StatusNotFound)
 		return
 	}
 

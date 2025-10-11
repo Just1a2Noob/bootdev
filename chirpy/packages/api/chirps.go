@@ -73,13 +73,13 @@ func (cfg *ApiConfig) HandlerDeleteChirps(w http.ResponseWriter, r http.Request)
 func (cfg *ApiConfig) HandlerGetChirps(w http.ResponseWriter, r *http.Request) {
 	chirps, err := cfg.Database.GetChirps(context.Background())
 	if err != nil {
-		ErrorResponse(w, fmt.Sprintf("GET error request : %s", err), http.StatusInternalServerError)
+		ErrorResponse(w, fmt.Sprintf("GET error request : %s", err), http.StatusNotFound)
 		return
 	}
 
 	data, err := json.Marshal(chirps)
 	if err != nil {
-		ErrorResponse(w, fmt.Sprintf("Error in marshaling GET request : %s", err), http.StatusInternalServerError)
+		ErrorResponse(w, fmt.Sprintf("Error in marshaling GET request : %s", err), http.StatusBadRequest)
 		return
 	}
 
@@ -114,7 +114,7 @@ func (cfg *ApiConfig) HandlerDeleteChirp(w http.ResponseWriter, r *http.Request)
 
 	chirps, err := cfg.Database.GetChirpID(context.Background(), chirpID)
 	if err != nil {
-		ErrorResponse(w, fmt.Sprintf("Error getting chirps from chirpID: %s", err), http.StatusBadRequest)
+		ErrorResponse(w, fmt.Sprintf("Error getting chirps from chirpID: %s", err), http.StatusNotFound)
 		return
 	}
 

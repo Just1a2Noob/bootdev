@@ -17,14 +17,14 @@ func (cfg *ApiConfig) HandlerRefreshToken(w http.ResponseWriter, r *http.Request
 	header := r.Header
 	old_token, err := auth.GetBearerToken(header)
 	if err != nil {
-		ErrorResponse(w, fmt.Sprintf("Error getting bearer token: %s", err), http.StatusInternalServerError)
+		ErrorResponse(w, fmt.Sprintf("Error getting bearer token: %s", err), http.StatusNotFound)
 		return
 	}
 
 	// Get refresh token database
 	refresh_token, err := cfg.Database.GetUserFromRefreshToken(context.Background(), old_token)
 	if err != nil {
-		ErrorResponse(w, "Error getting refresh token", http.StatusBadRequest)
+		ErrorResponse(w, fmt.Sprintf("Error getting refresh token: %s", err), http.StatusBadRequest)
 		return
 	}
 
@@ -44,7 +44,7 @@ func (cfg *ApiConfig) HandlerRefreshToken(w http.ResponseWriter, r *http.Request
 	// Validates JWT token
 	_, err = auth.ValidateJWT(new_token, cfg.Secret)
 	if err != nil {
-		ErrorResponse(w, fmt.Sprintf("Token missmatch with secret: %s", err), http.StatusInternalServerError)
+		ErrorResponse(w, fmt.Sprintf("Token missmatch with secret: %s", err), http.StatusBadRequest)
 		return
 	}
 
@@ -69,7 +69,7 @@ func (cfg *ApiConfig) HandlerRevokeToken(w http.ResponseWriter, r *http.Request)
 
 	old_token, err := auth.GetBearerToken(header)
 	if err != nil {
-		ErrorResponse(w, fmt.Sprintf("Error getting bearer token: %s", err), http.StatusInternalServerError)
+		ErrorResponse(w, fmt.Sprintf("Error getting bearer token: %s", err), http.StatusNotFound)
 		return
 	}
 
