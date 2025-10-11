@@ -123,7 +123,8 @@ func (cfg *ApiConfig) HandlerDeleteChirp(w http.ResponseWriter, r *http.Request)
 		ErrorResponse(w, fmt.Sprintf("Error checking logged in user: %s", err), http.StatusInternalServerError)
 		return
 	}
-	if ok == false {
+
+	if ok != true {
 		ErrorResponse(w, "Cannot create chirp: invalid authorization", http.StatusBadRequest)
 		return
 	}
