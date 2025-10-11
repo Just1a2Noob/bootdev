@@ -9,6 +9,7 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/Just1a2Noob/bootdev/chirpy/internal/auth"
 	"github.com/Just1a2Noob/bootdev/chirpy/internal/database"
 	"github.com/google/uuid"
 )
@@ -92,5 +93,22 @@ func ErrorResponse(w http.ResponseWriter, message string, code int) {
 	w.Write(data)
 }
 
-// TODO: Create a function to handle user logging check.
-// input(userID) -> checks loggedUser == userID -> output(boolean)
+func LoggedUser(r *http.Request, secret string, userID uuid.UUID) (bool, error) {
+	// This function is used to check the user logged in is equal to specified userID
+	token, err := auth.GetBearerToken(r.Header)
+	if err != nil {
+		return false, err
+	}
+
+	tokenUserID, err := auth.ValidateJWT(token, secret)
+	if err != nil {
+		return false, err
+	}
+
+	// Checking if login is the same as userID from chirp
+	if userID != tokenUserID {
+		return false, nil
+	}
+
+	return true, nil
+}

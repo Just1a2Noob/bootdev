@@ -6,7 +6,7 @@ import (
 )
 
 func MakeRefreshTokens() (string, error) {
-	// NOTE: Refresh tokens are used to give permission to refresh the JWT token
+	// Refresh tokens are used to give permission to refresh the JWT token
 	key := make([]byte, 32)
 	_, err := rand.Read(key)
 	if err != nil {

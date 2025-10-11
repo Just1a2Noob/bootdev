@@ -25,8 +25,6 @@ func (cfg *ApiConfig) HandlerUpdateUser(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	// NOTE: Uses token to check login user
-
 	// Gets the header token
 	token, err := auth.GetBearerToken(r.Header)
 	if err != nil {
@@ -35,7 +33,7 @@ func (cfg *ApiConfig) HandlerUpdateUser(w http.ResponseWriter, r *http.Request) 
 	}
 
 	// Validates token
-	// NOTE: tokenUserID can be assumed as a unique identifier for the user
+	// tokenUserID can be assumed as a unique identifier for the user
 	tokenUserID, err := auth.ValidateJWT(token, cfg.Secret)
 	if err != nil {
 		ErrorResponse(w, fmt.Sprintf("Failed validating JWT token: %s", err), http.StatusBadRequest)

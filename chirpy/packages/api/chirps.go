@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/Just1a2Noob/bootdev/chirpy/internal/auth"
 	"github.com/Just1a2Noob/bootdev/chirpy/internal/database"
 	"github.com/google/uuid"
 )
@@ -32,31 +31,13 @@ func (cfg *ApiConfig) HandlerAddChirp(w http.ResponseWriter, r *http.Request) {
 
 	cleaned_text := chirp.Body
 
-	// NOTE: uses Token to check login user
-
-	// Gets authentication/login user
-	token, err := auth.GetBearerToken(r.Header)
+	ok, err := LoggedUser(r, cfg.Secret, uuid.MustParse(chirp.UserID))
 	if err != nil {
-		ErrorResponse(w, fmt.Sprintf("Error getting authorization header: %s", err), http.StatusInternalServerError)
+		ErrorResponse(w, fmt.Sprintf("Error checking logged in user: %s", err), http.StatusInternalServerError)
 		return
 	}
-
-	tokenUserID, err := auth.ValidateJWT(token, cfg.Secret)
-	if err != nil {
-		ErrorResponse(w, fmt.Sprintf("Failed validating JWT token: %s", err), http.StatusBadRequest)
-		return
-	}
-
-	// Parse and validate the user UUID
-	userID, err := uuid.Parse(chirp.UserID)
-	if err != nil {
-		ErrorResponse(w, fmt.Sprintf("Invalid user ID format: %s", err), http.StatusBadRequest)
-		return
-	}
-
-	// Checking if login is the same as userID from chirp
-	if userID != tokenUserID {
-		ErrorResponse(w, fmt.Sprintf("Chirp user ID does not match with Logged in user: %s", err), http.StatusUnauthorized)
+	if ok == false {
+		ErrorResponse(w, "Cannot create chirp: invalid authorization", http.StatusBadRequest)
 		return
 	}
 
@@ -65,7 +46,7 @@ func (cfg *ApiConfig) HandlerAddChirp(w http.ResponseWriter, r *http.Request) {
 		CreatedAt: time.Now().UTC(),
 		UpdatedAt: time.Now().UTC(),
 		Body:      cleaned_text,
-		UserID:    userID,
+		UserID:    uuid.MustParse(chirp.UserID),
 	})
 	if err != nil {
 		ErrorResponse(w, fmt.Sprintf("Error creating chirp for database : %s", err), http.StatusInternalServerError)
@@ -137,22 +118,13 @@ func (cfg *ApiConfig) HandlerDeleteChirp(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	// NOTE: Uses token to check login user
-	token, err := auth.GetBearerToken(r.Header)
+	ok, err := LoggedUser(r, cfg.Secret, chirps.UserID)
 	if err != nil {
-		ErrorResponse(w, fmt.Sprintf("Error getting authorization header: %s", err), http.StatusInternalServerError)
+		ErrorResponse(w, fmt.Sprintf("Error checking logged in user: %s", err), http.StatusInternalServerError)
 		return
 	}
-
-	tokenUserID, err := auth.ValidateJWT(token, cfg.Secret)
-	if err != nil {
-		ErrorResponse(w, fmt.Sprintf("Failed validating JWT token: %s", err), http.StatusBadRequest)
-		return
-	}
-
-	// Checking if login is the same as userID from chirp
-	if chirps.UserID != tokenUserID {
-		ErrorResponse(w, fmt.Sprintf("Chirp user ID does not match with Logged in user: %s", err), http.StatusUnauthorized)
+	if ok == false {
+		ErrorResponse(w, "Cannot create chirp: invalid authorization", http.StatusBadRequest)
 		return
 	}
 
