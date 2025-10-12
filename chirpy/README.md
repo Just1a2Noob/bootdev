@@ -1,4 +1,17 @@
 
+# Goal
+
+This small project is meant to showcase and learn how HTTP Servers work in go.
+
+The practicality of this project is creating a REST API with some basic functionality:
+
+- Reading from database.
+- Getting data from database.
+- Data from database is sent to the client in JSON format.
+- Managing database migration and changes.
+- Authentication and Authorization using JWT Tokens.
+
+
 # API Documentation
 
 ## Admin (group)
@@ -56,7 +69,7 @@ HTTP Response:
     "is_chirpy_red":"false"
 }
 ```
-- `id` = The identifies for this resource.
+- `id` = The identifier for this resource.
 - `created_at` = The time and date of when this resource is created.
 - `updated_at` = The time and date of when this resource is last updated.
 - `email` = The email of the user.
@@ -91,7 +104,7 @@ HTTP Response:
 }
 ```
 
-- `id` = The identifies for this resource.
+- `id` = The identifier for this resource.
 - `created_at` = The time and date of when this resource is created.
 - `updated_at` = The time and date of when this resource is last updated.
 - `email` = The email of the user.
@@ -119,7 +132,7 @@ Output:
     "updated_at": "2025-10-12T08:03:59.573533Z"
 }
 ```
-- `id` = The identifies for this resource.
+- `id` = The identifier for this resource.
 - `email` = The email of the user.
 - `updated_at` = The time and date of when this resource is last updated.
 
@@ -157,7 +170,7 @@ Server response:
 }
 ```
 
-- `id` = The identifies for this resource.
+- `id` = The identifier for this resource.
 - `created_at` = The time and date of when this resource is created.
 - `updated_at` = The time and date of when this resource is last updated.
 - `body` = The body text within the chirp.
@@ -195,7 +208,7 @@ Server Response:
 ]
 ```
 
-- `id` = The identifies for this resource.
+- `id` = The identifier for this resource.
 - `created_at` = The time and date of when this resource is created.
 - `updated_at` = The time and date of when this resource is last updated.
 - `body` = The body text within the chirp.
