@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/Just1a2Noob/bootdev/chirpy/internal/auth"
 	"github.com/Just1a2Noob/bootdev/chirpy/internal/database"
 	"github.com/google/uuid"
 )
@@ -29,6 +30,17 @@ func (cfg *ApiConfig) HandlerChirpRed(w http.ResponseWriter, r *http.Request) {
 
 	if webHook.Event != "user.upgraded" {
 		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+
+	polka_key, err := auth.GetAPIKey(r.Header)
+	if err != nil {
+		ErrorResponse(w, fmt.Sprintf("Polka key cannot be extracted: %s", err), http.StatusBadRequest)
+		return
+	}
+
+	if polka_key != cfg.Polka_key {
+		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 
