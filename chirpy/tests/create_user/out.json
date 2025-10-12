@@ -1,0 +1,9 @@
+{
+  "id": "2b3916f0-56c3-49ac-b8ef-3d69ad017a94",
+  "created_at": "2025-10-12T08:03:59.573532Z",
+  "updated_at": "2025-10-12T08:03:59.573533Z",
+  "email": "test@gmail.com",
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJjaGlycHkiLCJzdWIiOiIyYjM5MTZmMC01NmMzLTQ5YWMtYjhlZi0zZDY5YWQwMTdhOTQiLCJleHAiOjE3NjAyNjAwNTQsImlhdCI6MTc2MDI1NjQ1NH0.Pq9KmT8-6WK6zq_MEwWCfllje1mwbK3GzlSG5dI80QM",
+  "refresh_token": "bfb1543e695a2927a3044bfafb7b0b6d614df8e0033e02faf72ec0382d7e9c17",
+  "is_chirpy_red": "false"
+}
