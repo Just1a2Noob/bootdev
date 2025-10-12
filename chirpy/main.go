@@ -28,11 +28,13 @@ func main() {
 	const filepathRoot = "."
 	const port = "8080"
 	secret := os.Getenv("SECRET")
+	polka_key := os.Getenv("POLKA_KEY")
 
 	apicfg := api.ApiConfig{
 		FileserverHits: atomic.Int32{},
 		Database:       *dbQueries,
 		Secret:         secret,
+		Polka_key:      polka_key,
 	}
 
 	mux := http.NewServeMux()
