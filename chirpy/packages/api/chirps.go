@@ -71,20 +71,43 @@ func (cfg *ApiConfig) HandlerDeleteChirps(w http.ResponseWriter, r http.Request)
 }
 
 func (cfg *ApiConfig) HandlerGetChirps(w http.ResponseWriter, r *http.Request) {
-	chirps, err := cfg.Database.GetChirps(context.Background())
-	if err != nil {
-		ErrorResponse(w, fmt.Sprintf("GET error request : %s", err), http.StatusNotFound)
-		return
+	w.Header().Set("Content-Type", "application/json")
+
+	author_id := r.URL.Query().Get("author_id")
+	// If author parameter is not provided
+	if author_id == "" {
+		chirps, err := cfg.Database.GetChirps(context.Background())
+		if err != nil {
+			ErrorResponse(w, fmt.Sprintf("GET error request : %s", err), http.StatusInternalServerError)
+			return
+		}
+
+		data, err := json.Marshal(chirps)
+		if err != nil {
+			ErrorResponse(w, fmt.Sprintf("Error in marshaling GET request : %s", err), http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		w.Write(data)
+	} else {
+		// If author ID is given
+		chirps, err := cfg.Database.GetChirpsByAuthor(context.Background(), uuid.MustParse(author_id))
+		if err != nil {
+			ErrorResponse(w, fmt.Sprintf("Error finding author ID: %s", err), http.StatusNotFound)
+			return
+		}
+
+		data, err := json.Marshal(chirps)
+		if err != nil {
+			ErrorResponse(w, fmt.Sprintf("Error in marshaling GET request : %s", err), http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		w.Write(data)
 	}
 
-	data, err := json.Marshal(chirps)
-	if err != nil {
-		ErrorResponse(w, fmt.Sprintf("Error in marshaling GET request : %s", err), http.StatusBadRequest)
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
-	w.Write(data)
 }
 
 func (cfg *ApiConfig) HandlerGetChirpID(w http.ResponseWriter, r *http.Request) {
