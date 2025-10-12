@@ -25,8 +25,8 @@ type UserResponse struct {
 	CreatedAt     time.Time `json:"created_at"`
 	UpdatedAt     time.Time `json:"updated_at"`
 	Email         string    `json:"email"`
-	Token         string    `json:"token"`
-	Refresh_token string    `json:"refresh_token"`
+	Token         string    `json:"token,omitempty"`
+	Refresh_token string    `json:"refresh_token,omitempty"`
 	IsChirpyRed   string    `json:"is_chirpy_red"`
 }
 
