@@ -1,0 +1,15 @@
+# https://kubernetes.io/docs/concepts/services-networking/service/
+apiVersion: v1
+kind: Service
+metadata:
+  name: crawler-service
+  namespace: default
+spec:
+  selector:
+    app: synergychat-crawler
+  type: ClusterIP
+  ports:
+    - name: crawler-service
+      protocol: TCP
+      port: 80
+      targetPort: 8080
